@@ -29,7 +29,6 @@ namespace GameClient
 
         public RT_Dialog_ItemListing(Thing[] listedThings, CommonEnumerators.TransferMode transferMode)
         {
-            DialogManager.dialogItemListing = this;
             this.listedThings = listedThings;
             this.transferMode = transferMode;
 
@@ -121,6 +120,7 @@ namespace GameClient
         {
             Action r1 = delegate
             {
+                DialogManager.PopDialog();
                 if (transferMode == CommonEnumerators.TransferMode.Gift)
                 {
                     TransferManager.GetTransferedItemsToSettlement(listedThings);
@@ -135,7 +135,7 @@ namespace GameClient
 
                     else
                     {
-                        DialogManager.PushNewDialog(new RT_Dialog_Error("You do not have any pawn capable of trading!"));
+                        DialogManager.PushNewDialog(new RT_Dialog_Error("You do not have any pawn capable of trading!", DialogManager.PopDialog));
                         TransferManager.RejectRequest(transferMode);
                     }
                 }
@@ -155,11 +155,10 @@ namespace GameClient
                     TransferManager.GetTransferedItemsToCaravan(listedThings);
                 }
 
-                Close();
             };
 
             DialogManager.PushNewDialog(new RT_Dialog_YesNo("Are you sure you want to accept?",
-                r1, null));
+                r1, DialogManager.PopDialog));
         }
 
         private void OnReject()
@@ -168,11 +167,11 @@ namespace GameClient
             {
                 TransferManager.RejectRequest(transferMode);
 
-                Close();
+                DialogManager.PopDialog();
             };
 
             DialogManager.PushNewDialog(new RT_Dialog_YesNo("Are you sure you want to decline?",
-                r1, null));
+                r1, DialogManager.PopDialog));
         }
     }
 }
