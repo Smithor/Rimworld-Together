@@ -178,8 +178,8 @@ namespace GameClient
             {
                 TransferManager.TakeTransferItems(transferLocation);
                 TransferManager.SendTransferRequestToServer(transferLocation);
-                //pop transfer menu dialog
-                DialogManager.PopDialog();
+                //pop transfer menu and transfer type dialog
+                DialogManager.ClearStack();
             }
         }
 

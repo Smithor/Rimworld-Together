@@ -18,10 +18,12 @@ namespace GameClient
 
             switch (int.Parse(transferManifestJSON.transferStepMode))
             {
+                //settlement recieves request
                 case (int)TransferStepMode.TradeRequest:
                     ReceiveTransferRequest(transferManifestJSON);
                     break;
 
+                //Caravan's trade is accepted
                 case (int)TransferStepMode.TradeAccept:
                     DialogManager.PopDialog();
                     DialogManager.PushNewDialog(new RT_Dialog_OK("Transfer was a success!"));
@@ -96,6 +98,8 @@ namespace GameClient
         public static void SendTransferRequestToServer(TransferLocation transferLocation)
         {
             DialogManager.PushNewDialog(new RT_Dialog_Wait("Waiting for transfer response"));
+
+            Logs.Message($"There are {ClientValues.outgoingManifest.itemDetailsJSONS.Count()} items being traded");
 
             if (transferLocation == TransferLocation.Caravan)
             {

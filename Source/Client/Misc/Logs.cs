@@ -19,7 +19,7 @@ namespace GameClient
         {
             if (!ClientValues.extremeVerboseBool) return;
 
-            semaphore.WaitOne();
+            
 
             //Write message to player.log file
             Log.Message(message);
@@ -27,14 +27,12 @@ namespace GameClient
             //write message to (player name).log file located in RimWorld by Ludeon Studios\Rimworld Together
             WriteMessage(message);
 
-            semaphore.Release();
         }
 
         public static void Warning(string message)
         {
             if (!ClientValues.extremeVerboseBool) return;
 
-            semaphore.WaitOne();
 
             //Write warning to player.log file
             Log.Warning(message);
@@ -42,14 +40,12 @@ namespace GameClient
             //Write message to (player name).log file located in RimWorld by Ludeon Studios\Rimworld Together
             WriteMessage(message);
 
-            semaphore.Release();
         }
 
         public static void Error(string message, bool ignoreStopLoggingLimit = true)
         {
             if (!ClientValues.extremeVerboseBool) return;
 
-            semaphore.WaitOne();
 
             //Write warning to player.log file
             Log.Error(message, ignoreStopLoggingLimit);
@@ -57,19 +53,21 @@ namespace GameClient
             //Write message to (player name).log file located in RimWorld by Ludeon Studios\Rimworld Together
             WriteMessage(message);
 
-            semaphore.Release();
         }
 
         private static void WriteMessage(string message)
         {
+            semaphore.WaitOne();
             using (StreamWriter w = File.AppendText(LogFilePath))
             {
                 w.WriteLine(message);
             }
+            semaphore.Release();
         }
 
         public static void PrepareFileName(string ModFolder)
         {
+            Log.Message("preparing File Name for Log file");
             //Get Instance file path
             InstanceListFile = Path.Combine(ModFolder, "InstanceList.txt");
 

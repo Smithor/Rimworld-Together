@@ -120,6 +120,7 @@ namespace GameClient
         {
             Action r1 = delegate
             {
+                DialogManager.PopDialog();
                 if (transferMode == CommonEnumerators.TransferMode.Gift)
                 {
                     TransferManager.GetTransferedItemsToSettlement(listedThings);
@@ -154,7 +155,6 @@ namespace GameClient
                     TransferManager.GetTransferedItemsToCaravan(listedThings);
                 }
 
-                DialogManager.PopDialog();
             };
 
             DialogManager.PushNewDialog(new RT_Dialog_YesNo("Are you sure you want to accept?",

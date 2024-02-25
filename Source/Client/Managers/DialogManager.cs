@@ -64,11 +64,19 @@ namespace GameClient
 
         public static void PopDialog() 
         {
-            Logs.Message($"[Rimworld Together] > popping {windowStack.Peek().ToString()}");
 
-            Find.WindowStack.TryRemove(windowStack.Pop(), true);
+            if (windowStack.Count > 0)
+            {
+                Logs.Message($"[Rimworld Together] > popping {windowStack.Peek().ToString()}");
 
-            if(windowStack.Count > 0 ) Find.WindowStack.Add(windowStack.Peek());
+                Find.WindowStack.TryRemove(windowStack.Pop(), true);
+
+                Find.WindowStack.Add(windowStack.Peek());
+            }
+            else
+            {
+                Logs.Message("[Rimworld Together] > Tried to pop a window from an empty stack");
+            }
         }
 
         public static void PopDialog(Window window)
