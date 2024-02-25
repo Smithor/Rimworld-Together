@@ -8,12 +8,8 @@ using Verse;
 
 namespace GameClient
 {
-    //Class that handles settlement and site player likelihoods
-
     public static class LikelihoodManager
     {
-        //Tries to request a likelihood change depending on the values given
-
         public static void TryRequestLikelihood(CommonEnumerators.Likelihoods type, CommonEnumerators.LikelihoodTarget target)
         {
             int tileToUse = 0;
@@ -28,7 +24,7 @@ namespace GameClient
             {
                 if (factionToUse == FactionValues.enemyPlayer)
                 {
-                    RT_Dialog_Error d1 = new RT_Dialog_Error("Chosen settlement is already marked as enemy!");
+                    RT_Dialog_Error d1 = new RT_Dialog_Error("Chosen settlement is already marked as enemy!", DialogManager.ClearStack);
                     DialogManager.PushNewDialog(d1);
                 }
                 else RequestChangeStructureLikelihood(tileToUse, 0);
@@ -38,7 +34,7 @@ namespace GameClient
             {
                 if (factionToUse == FactionValues.neutralPlayer)
                 {
-                    RT_Dialog_Error d1 = new RT_Dialog_Error("Chosen settlement is already marked as neutral!");
+                    RT_Dialog_Error d1 = new RT_Dialog_Error("Chosen settlement is already marked as neutral!", DialogManager.ClearStack);
                     DialogManager.PushNewDialog(d1);
                 }
                 else RequestChangeStructureLikelihood(tileToUse, 1);
@@ -48,14 +44,12 @@ namespace GameClient
             {
                 if (factionToUse == FactionValues.allyPlayer)
                 {
-                    RT_Dialog_Error d1 = new RT_Dialog_Error("Chosen settlement is already marked as ally!");
+                    RT_Dialog_Error d1 = new RT_Dialog_Error("Chosen settlement is already marked as ally!", DialogManager.ClearStack);
                     DialogManager.PushNewDialog(d1);
                 }
                 else RequestChangeStructureLikelihood(tileToUse, 2);
             }
         }
-
-        //Requests a structure likelihood change to the server
 
         public static void RequestChangeStructureLikelihood(int structureTile, int value)
         {
@@ -70,16 +64,12 @@ namespace GameClient
             DialogManager.PushNewDialog(d1);
         }
 
-        //Changes a structure likelihood from a packet
-
         public static void ChangeStructureLikelihood(Packet packet)
         {
             StructureLikelihoodJSON structureLikelihoodJSON = (StructureLikelihoodJSON)Serializer.ConvertBytesToObject(packet.contents);
             ChangeSettlementLikelihoods(structureLikelihoodJSON);
             ChangeSiteLikelihoods(structureLikelihoodJSON);
         }
-
-        //Changes a settlement likelihood from a request
 
         private static void ChangeSettlementLikelihoods(StructureLikelihoodJSON structureLikelihoodJSON)
         {
@@ -103,8 +93,6 @@ namespace GameClient
                 Find.WorldObjects.Add(newSettlement);
             }
         }
-
-        //Changes a site likelihood from a request
 
         private static void ChangeSiteLikelihoods(StructureLikelihoodJSON structureLikelihoodJSON)
         {

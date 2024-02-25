@@ -64,7 +64,7 @@ namespace GameClient
 
             catch 
             { 
-                Log.Warning("Server didn't have event prices set, defaulting to 0");
+                Logs.Warning("Server didn't have event prices set, defaulting to 0");
 
                 eventCosts = new int[9]
                 {
@@ -75,30 +75,30 @@ namespace GameClient
 
         public static void ShowSendEventDialog()
         {
-            RT_Dialog_YesNo d1 = new RT_Dialog_YesNo($"This event will cost you {eventCosts[DialogManager.selectedScrollButton]} " +
-                $"silver, continue?", SendEvent, null);
+            RT_Dialog_YesNo d1 = new RT_Dialog_YesNo($"This event will cost you {eventCosts[(int)DialogManager.inputCache[0]]} " +
+                $"silver, continue?", SendEvent, DialogManager.PopDialog);
 
             DialogManager.PushNewDialog(d1);
         }
 
         public static void SendEvent()
         {
-            DialogManager.PopDialog(DialogManager.dialogScrollButtons);
+            DialogManager.PopDialog();
 
-            if (!RimworldManager.CheckIfHasEnoughSilverInCaravan(eventCosts[DialogManager.selectedScrollButton]))
+            if (!RimworldManager.CheckIfHasEnoughSilverInCaravan(eventCosts[(int)DialogManager.inputCache[0]]))
             {
-                DialogManager.PushNewDialog(new RT_Dialog_Error("You do not have enough silver!"));
+                DialogManager.PushNewDialog(new RT_Dialog_Error("You do not have enough silver!", DialogManager.PopDialog));
             }
 
             else
             {
-                RimworldManager.RemoveThingFromCaravan(ThingDefOf.Silver, eventCosts[DialogManager.selectedScrollButton]);
+                RimworldManager.RemoveThingFromCaravan(ThingDefOf.Silver, eventCosts[(int)DialogManager.inputCache[0]]);
 
                 EventDetailsJSON eventDetailsJSON = new EventDetailsJSON();
                 eventDetailsJSON.eventStepMode = ((int)CommonEnumerators.EventStepMode.Send).ToString();
                 eventDetailsJSON.fromTile = Find.AnyPlayerHomeMap.Tile.ToString();
                 eventDetailsJSON.toTile = ClientValues.chosenSettlement.Tile.ToString();
-                eventDetailsJSON.eventID = DialogManager.selectedScrollButton.ToString();
+                eventDetailsJSON.eventID = ((int)DialogManager.inputCache[0]).ToString();
 
                 Packet packet = Packet.CreatePacketFromJSON("EventPacket", eventDetailsJSON);
                 Network.listener.dataQueue.Enqueue(packet);
@@ -115,50 +115,48 @@ namespace GameClient
         public static void LoadEvent(int eventID)
         {
             IncidentDef incidentDef = null;
-            Map map = Find.AnyPlayerHomeMap;
-
             IncidentParms parms = null;
-            IncidentParms defaultParms = null;
+            Map map = Find.AnyPlayerHomeMap;
 
             if (eventID == 0)
             {
                 incidentDef = IncidentDefOf.RaidEnemy;
-                defaultParms = StorytellerUtility.DefaultParmsNow(incidentDef.category, map);
+                IncidentParms defaultParms = StorytellerUtility.DefaultParmsNow(incidentDef.category, Find.AnyPlayerHomeMap);
 
                 parms = new IncidentParms
                 {
-                    raidArrivalMode = defaultParms.raidArrivalMode,
-                    raidStrategy = defaultParms.raidStrategy,
                     customLetterLabel = "Event - Raid",
+                    target = map,
                     points = defaultParms.points,
                     faction = Faction.OfPirates,
-                    target = map
+                    raidStrategy = defaultParms.raidStrategy,
+                    raidArrivalMode = defaultParms.raidArrivalMode,
                 };
             }
 
             else if (eventID == 1)
             {
                 incidentDef = IncidentDefOf.Infestation;
-                defaultParms = StorytellerUtility.DefaultParmsNow(incidentDef.category, map);
+                IncidentParms defaultParms = StorytellerUtility.DefaultParmsNow(incidentDef.category, Find.AnyPlayerHomeMap);
 
                 parms = new IncidentParms
                 {
                     customLetterLabel = "Event - Infestation",
+                    target = Find.AnyPlayerHomeMap,
                     points = defaultParms.points,
-                    target = map
                 };
             }
 
             else if (eventID == 2)
             {
                 incidentDef = IncidentDefOf.MechCluster;
-                defaultParms = StorytellerUtility.DefaultParmsNow(incidentDef.category, map);
+                IncidentParms defaultParms = StorytellerUtility.DefaultParmsNow(incidentDef.category, Find.AnyPlayerHomeMap);
 
                 parms = new IncidentParms
                 {
                     customLetterLabel = "Event - Cluster",
-                    points = defaultParms.points,
-                    target = map
+                    target = map,
+                    points = defaultParms.points
                 };
             }
 
@@ -170,82 +168,81 @@ namespace GameClient
                 }
 
                 incidentDef = IncidentDefOf.ToxicFallout;
-                defaultParms = StorytellerUtility.DefaultParmsNow(incidentDef.category, map);
+                IncidentParms defaultParms = StorytellerUtility.DefaultParmsNow(incidentDef.category, Find.AnyPlayerHomeMap);
 
                 parms = new IncidentParms
                 {
                     customLetterLabel = "Event - Fallout",
-                    points = defaultParms.points,
-                    target = map
+                    target = map,
+                    points = defaultParms.points
                 };
             }
 
             else if (eventID == 4)
             {
                 incidentDef = IncidentDefOf.ManhunterPack;
-                defaultParms = StorytellerUtility.DefaultParmsNow(incidentDef.category, map);
+                IncidentParms defaultParms = StorytellerUtility.DefaultParmsNow(incidentDef.category, Find.AnyPlayerHomeMap);
 
                 parms = new IncidentParms
                 {
                     customLetterLabel = "Event - Manhunter",
-                    points = defaultParms.points,
-                    target = map
+                    target = Find.AnyPlayerHomeMap,
+                    points = defaultParms.points
                 };
             }
 
             else if (eventID == 5)
             {
                 incidentDef = IncidentDefOf.WandererJoin;
-                defaultParms = StorytellerUtility.DefaultParmsNow(incidentDef.category, map);
+                IncidentParms defaultParms = StorytellerUtility.DefaultParmsNow(incidentDef.category, Find.AnyPlayerHomeMap);
 
                 parms = new IncidentParms
                 {
                     customLetterLabel = "Event - Wanderer",
-                    points = defaultParms.points,
-                    target = map
+                    target = map,
+                    points = defaultParms.points
                 };
             }
 
             else if (eventID == 6)
             {
                 incidentDef = IncidentDefOf.FarmAnimalsWanderIn;
-                defaultParms = StorytellerUtility.DefaultParmsNow(incidentDef.category, map);
+                IncidentParms defaultParms = StorytellerUtility.DefaultParmsNow(incidentDef.category, Find.AnyPlayerHomeMap);
 
                 parms = new IncidentParms
                 {
                     customLetterLabel = "Event - Animals",
-                    points = defaultParms.points,
-                    target = map
+                    target = Find.AnyPlayerHomeMap,
+                    points = defaultParms.points
                 };
             }
 
             else if (eventID == 7)
             {
                 incidentDef = IncidentDefOf.ShipChunkDrop;
-                defaultParms = StorytellerUtility.DefaultParmsNow(incidentDef.category, map);
+                IncidentParms defaultParms = StorytellerUtility.DefaultParmsNow(incidentDef.category, Find.AnyPlayerHomeMap);
 
                 parms = new IncidentParms
                 {
-                    customLetterLabel = "Event - Space Chunks",
-                    points = defaultParms.points,
                     target = map,
+                    points = defaultParms.points
                 };
 
-                RimworldManager.GenerateLetter("Event - Space Chunks", "Space chunks", LetterDefOf.PositiveEvent);
+                LetterManager.GenerateLetter("Event - Space Chunks", "Space chunks", LetterDefOf.PositiveEvent);
             }
 
             else if (eventID == 8)
             {
                 incidentDef = IncidentDefOf.TraderCaravanArrival;
-                defaultParms = StorytellerUtility.DefaultParmsNow(incidentDef.category, map);
+                IncidentParms defaultParms = StorytellerUtility.DefaultParmsNow(incidentDef.category, Find.AnyPlayerHomeMap);
 
                 parms = new IncidentParms
                 {
-                    faction = FactionValues.neutralPlayer,
                     customLetterLabel = "Event - Trader",
-                    traderKind = defaultParms.traderKind,
+                    target = map,
                     points = defaultParms.points,
-                    target = map
+                    faction = FactionValues.neutralPlayer,
+                    traderKind = defaultParms.traderKind
                 };
             }
 
@@ -256,23 +253,22 @@ namespace GameClient
 
         public static void OnEventSent()
         {
-            DialogManager.PopWaitDialog();
+            DialogManager.PopDialog();
 
-            RimworldManager.GenerateLetter("Event sent!", "Your event has been sent and received!", 
-                LetterDefOf.PositiveEvent);
+            LetterManager.GenerateLetter("Event sent!", "Your event has been sent and received!", LetterDefOf.PositiveEvent);
 
             SaveManager.ForceSave();
         }
 
         private static void OnRecoverEventSilver()
         {
-            DialogManager.PopWaitDialog();
+            DialogManager.PopDialog();
 
-            TransferManager.SendSilverToCaravan(eventCosts[DialogManager.selectedScrollButton]);
+            TransferManager.SendSilverToCaravan(eventCosts[(int)DialogManager.inputCache[0]]);
 
-            DialogManager.PushNewDialog(new RT_Dialog_OK("Spent silver has been recovered"));
+            DialogManager.PushNewDialog(new RT_Dialog_OK("Spent silver has been recovered", DialogManager.ClearStack));
 
-            DialogManager.PushNewDialog(new RT_Dialog_Error("Player is not currently available!"));
+            DialogManager.PushNewDialog(new RT_Dialog_Error("Player is not currently available!", DialogManager.PopDialog));
         }
     }
 }

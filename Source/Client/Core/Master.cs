@@ -44,6 +44,14 @@ namespace GameClient
             savesPath = GenFilePaths.SavedGamesFolderPath;
 
             if (!Directory.Exists(modPath)) Directory.CreateDirectory(modPath);
+
+            //Prepare Rimworld Together Log files
+            try { 
+                Logs.PrepareFileName(modPath);
+                Logs.Message("Successfully Instantiated Log file");
+                }
+            catch { Log.Warning("Logger function failed to initialize"); }
+            
         }
 
         public static void CreateUnityDispatcher()

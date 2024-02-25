@@ -61,7 +61,7 @@ namespace GameClient
             {
                 try
                 {
-                    Thing toGet = DeepScribeManager.GetItemSimple(Serializer.SerializeFromString<ItemDetailsJSON>(str));
+                    Thing toGet = ThingScribeManager.GetItemSimple(Serializer.SerializeFromString<ItemDetailsJSON>(str));
                     thingsToGetInThisTile.Add(toGet);
                 }
                 catch { }
@@ -95,7 +95,7 @@ namespace GameClient
             {
                 try
                 {
-                    Thing toGet = DeepScribeManager.GetItemSimple(Serializer.SerializeFromString<ItemDetailsJSON>(str));
+                    Thing toGet = ThingScribeManager.GetItemSimple(Serializer.SerializeFromString<ItemDetailsJSON>(str));
 
                     //if lessLoot is true, Some items will not be generated
                     if (lessSettlementLoot)
@@ -134,7 +134,7 @@ namespace GameClient
 
                 try
                 {
-                    Pawn human = DeepScribeManager.GetHumanSimple(humanDetailsJSON);
+                    Pawn human = HumanScribeManager.GetHumanSimple(humanDetailsJSON);
                     human.SetFaction(FactionValues.yourOnlineFaction);
 
                     GenSpawn.Spawn(human, human.Position, map, Rot4.Random);
@@ -148,7 +148,7 @@ namespace GameClient
 
                 try
                 {
-                    Pawn human = DeepScribeManager.GetHumanSimple(humanDetailsJSON);
+                    Pawn human = HumanScribeManager.GetHumanSimple(humanDetailsJSON);
                     human.SetFaction(FactionValues.neutralPlayer);
 
                     GenSpawn.Spawn(human, human.Position, map, Rot4.Random);
@@ -178,7 +178,7 @@ namespace GameClient
 
                 try
                 {
-                    Pawn animal = DeepScribeManager.GetAnimalSimple(animalDetailsJSON);
+                    Pawn animal = AnimalScribeManager.GetAnimalSimple(animalDetailsJSON);
                     animal.SetFaction(FactionValues.yourOnlineFaction);
 
                     GenSpawn.Spawn(animal, animal.Position, map, Rot4.Random);
@@ -205,7 +205,7 @@ namespace GameClient
 
                 try
                 {
-                    Pawn animal = DeepScribeManager.GetAnimalSimple(animalDetailsJSON);
+                    Pawn animal = AnimalScribeManager.GetAnimalSimple(animalDetailsJSON);
                     animal.SetFaction(FactionValues.neutralPlayer);
 
                     GenSpawn.Spawn(animal, animal.Position, map, Rot4.Random);

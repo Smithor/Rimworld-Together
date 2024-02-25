@@ -9,9 +9,11 @@ namespace GameClient
 {
     public static class RimworldManager
     {
-        public static bool CheckForAnySocialPawn(CommonEnumerators.SearchLocation location)
+        public enum SearchLocation { Caravan, Settlement }
+
+        public static bool CheckForAnySocialPawn(SearchLocation location)
         {
-            if (location == CommonEnumerators.SearchLocation.Caravan)
+            if (location == SearchLocation.Caravan)
             {
                 Caravan caravan = ClientValues.chosenCaravan;
 
@@ -19,7 +21,7 @@ namespace GameClient
                 if (playerNegotiator != null) return true;
             }
 
-            else if (location == CommonEnumerators.SearchLocation.Settlement)
+            else if (location == SearchLocation.Settlement)
             {
                 Map map = Find.AnyPlayerHomeMap;
 
@@ -35,6 +37,22 @@ namespace GameClient
             Map map = Find.AnyPlayerHomeMap;
             if (map != null) return true;
             else return false;
+        }
+
+        public static bool CheckIfPlayerHasCommsConsole()
+        {
+            Map[] playerMaps = Find.Maps.FindAll(x => x.ParentFaction == RimWorld.Faction.OfPlayer).ToArray();
+
+            foreach(Map map in playerMaps)
+            {
+                Thing[] mapThings = map.listerThings.AllThings.ToArray();
+                foreach(Thing thing in mapThings)
+                {
+                    if (thing.def.defName == "CommsConsole") return true;
+                }
+            }
+
+            return false;
         }
 
         public static bool CheckIfHasEnoughSilverInCaravan(int requiredQuantity)
@@ -75,11 +93,31 @@ namespace GameClient
             }
         }
 
-        public static void GenerateLetter(string title, string description, LetterDef letterType)
+        public static Map[] GetMapsWithCommsConsole()
         {
-            Find.LetterStack.ReceiveLetter(title,
-                description,
-                letterType);
+            Map[] playerMaps = Find.Maps.FindAll(x => x.ParentFaction == RimWorld.Faction.OfPlayer).ToArray();
+
+            List<Map> mapsWithComms = new List<Map>();
+
+            foreach (Map map in playerMaps)
+            {
+                Thing[] mapThings = map.listerThings.AllThings.ToArray();
+                foreach (Thing thing in mapThings)
+                {
+                    if (thing.def.defName == "CommsConsole") mapsWithComms.Add(map);
+                }
+            }
+
+            return mapsWithComms.ToArray();
+        }
+
+        public static MapDetailsJSON GetMap(Map map, bool includeItems, bool includeHumans, bool includeAnimals, bool includeMods)
+        {
+            MapDetailsJSON mapDetailsJSON = MapScribeManager.TransformMapToString(map, includeItems, includeHumans, includeAnimals);
+
+            if (includeMods) mapDetailsJSON.mapMods = ModManager.GetRunningModList().ToList();
+
+            return mapDetailsJSON;
         }
     }
 }

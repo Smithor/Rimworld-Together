@@ -80,15 +80,14 @@ namespace GameClient
                 IdDict = GetLogCheckout(InstanceListFile);
                 foreach (string file in IdDict.Keys){
 
-                    //Check if the process is currently running
+                    //Check if the process is not running
                     if (Process.GetProcessById(IdDict[file]).HasExited){
                         IdDict.Remove(file);
                         LogFile = file;
                         LogFilePath = Path.Combine(ModFolder, file);
                         break;
                     }
-
-                    //Check if the process which is running is a rimworld process
+                    //the process is running,so check if the process which is running is a rimworld process
                     else if (Process.GetProcessById(IdDict[file]).ProcessName != Process.GetCurrentProcess().ProcessName)
                     {
                         IdDict.Remove(file);
@@ -102,6 +101,7 @@ namespace GameClient
                 //Set LogFilePath to a new log file
                 if (LogFilePath == null)
                 {
+                    Log.Message("Could not find a free Log file, Creating a new one");
                     LogFile = $"Log{IdDict.Count + 1}.log";
                     LogFilePath = Path.Combine(ModFolder, LogFile);
                 }
@@ -124,6 +124,7 @@ namespace GameClient
             //If the instance file does not exist, create it and add in the first entry
             else
             {
+                Log.Message("creating InstanceList.txt");
                 using (StreamWriter w = File.CreateText(InstanceListFile))
                 {
                     w.WriteLine($"Log1.log {Process.GetCurrentProcess().Id}");

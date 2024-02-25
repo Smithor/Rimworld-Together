@@ -3,12 +3,8 @@ using Shared;
 
 namespace GameClient
 {
-    //Class that handles how the client will answer to incoming server commands
-
     public static class CommandManager
     {
-        //Parses the received packet into a command to execute
-
         public static void ParseCommand(Packet packet)
         {
             CommandDetailsJSON commandDetailsJSON = (CommandDetailsJSON)Serializer.ConvertBytesToObject(packet.contents);
@@ -45,8 +41,6 @@ namespace GameClient
             }
         }
 
-        //Executes the command depending on the type
-
         private static void OnOpCommand()
         {
             ServerValues.isAdmin = true;
@@ -68,7 +62,7 @@ namespace GameClient
 
         private static void OnBroadcastCommand(CommandDetailsJSON commandDetailsJSON)
         {
-            RimworldManager.GenerateLetter("Server Broadcast", commandDetailsJSON.commandDetails, LetterDefOf.PositiveEvent);
+            LetterManager.GenerateLetter("Server Broadcast", commandDetailsJSON.commandDetails, LetterDefOf.PositiveEvent);
         }
 
         private static void OnForceSaveCommand()

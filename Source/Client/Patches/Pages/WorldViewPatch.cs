@@ -242,7 +242,7 @@ namespace GameClient
                         ClientValues.chosenSettlement = __instance;
                         ClientValues.chosenCaravan = caravan;
 
-                        if (RimworldManager.CheckForAnySocialPawn(CommonEnumerators.SearchLocation.Caravan))
+                        if (RimworldManager.CheckForAnySocialPawn(RimworldManager.SearchLocation.Caravan))
                         {
                             DialogManager.PushNewDialog(new RT_Dialog_TransferMenu(CommonEnumerators.TransferLocation.Caravan, true, true, true));
                         }

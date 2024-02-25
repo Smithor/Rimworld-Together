@@ -14,7 +14,6 @@ namespace GameClient
 
         public RT_Dialog_Wait(string description)
         {
-            DialogManager.dialogWait = this;
             this.description = description;
 
             forcePause = true;
@@ -25,7 +24,6 @@ namespace GameClient
             closeOnAccept = false;
             closeOnCancel = false;
         }
-
 
         public override void DoWindowContents(Rect rect)
         {

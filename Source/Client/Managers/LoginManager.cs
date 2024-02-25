@@ -2,26 +2,22 @@
 
 namespace GameClient
 {
-    //Class that handles loging responses from the server
-
     public static class LoginManager
     {
-        //Parses the received packet into an order
-
         public static void ReceiveLoginResponse(Packet packet)
         {
-            DialogManager.PopWaitDialog();
+            DialogManager.PopDialog();
 
             JoinDetailsJSON loginDetailsJSON = (JoinDetailsJSON)Serializer.ConvertBytesToObject(packet.contents);
 
             switch(int.Parse(loginDetailsJSON.tryResponse))
             {
                 case (int)CommonEnumerators.LoginResponse.InvalidLogin:
-                    DialogManager.PushNewDialog(new RT_Dialog_Error("Login details are invalid! Please try again!"));
+                    DialogManager.PushNewDialog(new RT_Dialog_Error("Login details are invalid! Please try again!", DialogManager.PopDialog));
                     break;
 
                 case (int)CommonEnumerators.LoginResponse.BannedLogin:
-                    DialogManager.PushNewDialog(new RT_Dialog_Error("You are banned from this server!"));
+                    DialogManager.PushNewDialog(new RT_Dialog_Error("You are banned from this server!", DialogManager.PopDialog));
                     break;
 
                 case (int)CommonEnumerators.LoginResponse.RegisterSuccess:
@@ -29,15 +25,15 @@ namespace GameClient
                     break;
 
                 case (int)CommonEnumerators.LoginResponse.RegisterInUse:
-                    DialogManager.PushNewDialog(new RT_Dialog_Error("That username is already in use! Please try again!"));
+                    DialogManager.PushNewDialog(new RT_Dialog_Error("That username is already in use! Please try again!", DialogManager.PopDialog));
                     break;
 
                 case (int)CommonEnumerators.LoginResponse.RegisterError:
-                    DialogManager.PushNewDialog(new RT_Dialog_Error("There was an error registering! Please try again!"));
+                    DialogManager.PushNewDialog(new RT_Dialog_Error("There was an error registering! Please try again!", DialogManager.PopDialog));
                     break;
 
                 case (int)CommonEnumerators.LoginResponse.ExtraLogin:
-                    DialogManager.PushNewDialog(new RT_Dialog_Error("You connected from another place!"));
+                    DialogManager.PushNewDialog(new RT_Dialog_Error("You connected from another place!", DialogManager.PopDialog));
                     break;
 
                 case (int)CommonEnumerators.LoginResponse.WrongMods:
@@ -45,12 +41,12 @@ namespace GameClient
                     break;
 
                 case (int)CommonEnumerators.LoginResponse.ServerFull:
-                    DialogManager.PopDialog(DialogManager.dialog2Button);
-                    DialogManager.PushNewDialog(new RT_Dialog_Error("Server is full!"));
+                    DialogManager.PopDialog();
+                    DialogManager.PushNewDialog(new RT_Dialog_Error("Server is full!", DialogManager.PopDialog));
                     break;
 
                 case (int)CommonEnumerators.LoginResponse.Whitelist:
-                    DialogManager.PushNewDialog(new RT_Dialog_Error("Server is whitelisted!"));
+                    DialogManager.PushNewDialog(new RT_Dialog_Error("Server is whitelisted!", DialogManager.PopDialog));
                     break;
             }
         }

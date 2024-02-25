@@ -93,7 +93,7 @@ namespace GameClient
 
         public static void BreakPacket(Packet packet)
         {
-            DialogManager.PopWaitDialog();
+            DialogManager.PopDialog();
         }
 
         public static void RequestSavePartPacket(Packet packet)
@@ -113,7 +113,7 @@ namespace GameClient
 
         public static void LikelihoodPacket(Packet packet)
         {
-            DialogManager.PopWaitDialog();
+            DialogManager.PopDialog();
             LikelihoodManager.ChangeStructureLikelihood(packet);
         }
 
@@ -124,13 +124,13 @@ namespace GameClient
 
         public static void IllegalActionPacket(Packet packet)
         {
-            DialogManager.PopWaitDialog();
+            DialogManager.PopDialog();
             DialogManager.PushNewDialog(new RT_Dialog_Error("Kicked for ilegal actions!"));
         }
 
         public static void UserUnavailablePacket(Packet packet)
         {
-            DialogManager.PopWaitDialog();
+            DialogManager.PopDialog();
             DialogManager.PushNewDialog(new RT_Dialog_Error("Player is not currently available!"));
         }
 
