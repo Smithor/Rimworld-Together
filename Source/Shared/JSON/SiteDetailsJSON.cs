@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace RimworldTogether.Shared.JSON
+namespace Shared
 {
     [Serializable]
     public class SiteDetailsJSON
@@ -14,7 +14,7 @@ namespace RimworldTogether.Shared.JSON
 
         public string owner;
 
-        public string workerData;
+        public byte[] workerData;
 
         public string likelihood;
 

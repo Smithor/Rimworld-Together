@@ -1,10 +1,10 @@
 ﻿using System.IO;
 
-namespace Shared.Network
+namespace Shared
 {
     public class DownloadManager
     {
-        private FileStream fileStream;
+        public FileStream fileStream;
 
         public string filePath;
         public double fileSize;

@@ -1,23 +1,16 @@
-﻿using RimworldTogether.GameServer.Core;
-using RimworldTogether.GameServer.Files;
-using RimworldTogether.GameServer.Misc;
-using RimworldTogether.GameServer.Network;
-using RimworldTogether.Shared.Network;
-using RimworldTogether.Shared.Serializers;
-using Shared.JSON;
-using Shared.Misc;
+﻿using Shared;
 
-namespace RimworldTogether.GameServer.Managers
+namespace GameServer
 {
     public static class MapManager
     {
         public static void SaveUserMap(ServerClient client, Packet packet)
         {
-            MapFileJSON mapFileJSON = (MapFileJSON)ObjectConverter.ConvertBytesToObject(packet.contents);
+            MapFileJSON mapFileJSON = (MapFileJSON)Serializer.ConvertBytesToObject(packet.contents);
             mapFileJSON.mapOwner = client.username;
 
-            byte[] compressedMapBytes = GZip.Compress(ObjectConverter.ConvertObjectToBytes(mapFileJSON));
-            File.WriteAllBytes(Path.Combine(Program.mapsPath, mapFileJSON.mapTile + ".mpmap"), compressedMapBytes);
+            byte[] compressedMapBytes = GZip.Compress(Serializer.ConvertObjectToBytes(mapFileJSON));
+            File.WriteAllBytes(Path.Combine(Master.mapsPath, mapFileJSON.mapTile + ".mpmap"), compressedMapBytes);
 
             Logger.WriteToConsole($"[Save map] > {client.username} > {mapFileJSON.mapTile}");
         }
@@ -26,7 +19,7 @@ namespace RimworldTogether.GameServer.Managers
         {
             if (mapFile == null) return;
 
-            File.Delete(Path.Combine(Program.mapsPath, mapFile.mapTile + ".json"));
+            File.Delete(Path.Combine(Master.mapsPath, mapFile.mapTile + ".json"));
 
             Logger.WriteToConsole($"[Remove map] > {mapFile.mapTile}", Logger.LogMode.Warning);
         }
@@ -35,12 +28,12 @@ namespace RimworldTogether.GameServer.Managers
         {
             List<MapFileJSON> mapDetails = new List<MapFileJSON>();
 
-            string[] maps = Directory.GetFiles(Program.mapsPath);
+            string[] maps = Directory.GetFiles(Master.mapsPath);
             foreach (string str in maps)
             {
                 byte[] decompressedBytes = GZip.Decompress(File.ReadAllBytes(str));
 
-                MapFileJSON newMap = (MapFileJSON)ObjectConverter.ConvertBytesToObject(decompressedBytes);
+                MapFileJSON newMap = (MapFileJSON)Serializer.ConvertBytesToObject(decompressedBytes);
                 mapDetails.Add(newMap);
             }
 

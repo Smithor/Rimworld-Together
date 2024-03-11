@@ -1,14 +1,16 @@
-﻿using RimworldTogether.Shared.JSON;
-using RimworldTogether.Shared.Network;
-using RimworldTogether.Shared.Serializers;
-using Shared.JSON;
+﻿using Shared;
+using System.Linq;
 using Verse;
 
-namespace RimworldTogether.GameClient.Managers
+namespace GameClient
 {
+    //Class that handles map functions for the mod to use
+
     public static class MapManager
     {
-        public static void SendMapsToServer()
+        //Sends all the player maps to the server
+
+        public static void SendPlayerMapsToServer()
         {
             foreach (Map map in Find.Maps.ToArray())
             {
@@ -19,16 +21,29 @@ namespace RimworldTogether.GameClient.Managers
             }
         }
 
+        //Sends a desired map to the server
+
         private static void SendMapToServerSingle(Map map)
         {
-            MapDetailsJSON mapDetailsJSON = RimworldManager.GetMap(map, true, true, true, true);
+            MapDetailsJSON mapDetailsJSON = ParseMap(map, true, true, true, true);
 
             MapFileJSON mapFileJSON = new MapFileJSON();
             mapFileJSON.mapTile = mapDetailsJSON.mapTile;
-            mapFileJSON.mapData = ObjectConverter.ConvertObjectToBytes(mapDetailsJSON);
+            mapFileJSON.mapData = Serializer.ConvertObjectToBytes(mapDetailsJSON);
 
-            Packet packet = Packet.CreatePacketFromJSON("MapPacket", mapFileJSON);
-            Network.Network.serverListener.SendData(packet);
+            Packet packet = Packet.CreatePacketFromJSON(nameof(PacketHandler.MapPacket), mapFileJSON);
+            Network.listener.EnqueuePacket(packet);
+        }
+
+        //Parses a desired map into an usable mod class
+
+        public static MapDetailsJSON ParseMap(Map map, bool includeItems, bool includeHumans, bool includeAnimals, bool includeMods)
+        {
+            MapDetailsJSON mapDetailsJSON = MapScribeManager.MapToString(map, includeItems, includeHumans, includeAnimals);
+
+            if (includeMods) mapDetailsJSON.mapMods = ModManager.GetRunningModList().ToList();
+
+            return mapDetailsJSON;
         }
     }
 }

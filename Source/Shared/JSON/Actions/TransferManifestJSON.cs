@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace RimworldTogether.Shared.JSON.Actions
+namespace Shared
 {
     [Serializable]
     public class TransferManifestJSON
@@ -14,10 +14,10 @@ namespace RimworldTogether.Shared.JSON.Actions
 
         public string toTile;
 
-        public List<string> humanDetailsJSONS = new List<string>();
+        public List<byte[]> humanDetailsJSONS = new List<byte[]>();
 
-        public List<string> animalDetailsJSON = new List<string>();
+        public List<byte[]> animalDetailsJSON = new List<byte[]>();
 
-        public List<string> itemDetailsJSONS = new List<string>();
+        public List<byte[]> itemDetailsJSONS = new List<byte[]>();
     }
 }

@@ -1,33 +1,33 @@
-﻿using System;
-using RimworldTogether.GameClient.Core;
-using RimworldTogether.GameClient.Dialogs;
-using RimworldTogether.GameClient.Managers;
-using RimworldTogether.GameClient.Managers.Actions;
-using RimworldTogether.GameClient.Misc;
-using RimworldTogether.GameClient.Network.Listener;
-using RimworldTogether.GameClient.Values;
-using Verse;
+﻿using Verse;
 
-namespace RimworldTogether.GameClient.Network
+namespace GameClient
 {
+    //Main class that is used to handle the connection with the server
+
     public static class Network
     {
-        public static ServerListener serverListener;
+        //IP and Port that the connection will be bound to
         public static string ip = "";
         public static string port = "";
 
+        //TCP listener that will handle the connection with the server
+        public static Listener listener;
+
+        //Useful booleans to check connection status with the server
         public static bool isConnectedToServer;
         public static bool isTryingToConnect;
+
+        //Entry point function of the network class
 
         public static void StartConnection()
         {
             if (TryConnectToServer())
             {
                 DialogManager.PopWaitDialog();
-                ClientValues.ManageDevOptions();
                 SiteManager.SetSiteDefs();
 
                 Threader.GenerateThread(Threader.Mode.Listener);
+                Threader.GenerateThread(Threader.Mode.Sender);
                 Threader.GenerateThread(Threader.Mode.Health);
                 Threader.GenerateThread(Threader.Mode.KASender);
 
@@ -41,9 +41,11 @@ namespace RimworldTogether.GameClient.Network
                 RT_Dialog_Error d1 = new RT_Dialog_Error("The server did not respond in time");
                 DialogManager.PushNewDialog(d1);
 
-                ClearAllValues();
+                CleanValues();
             }
         }
+
+        //Tries to connect into the specified server
 
         private static bool TryConnectToServer()
         {
@@ -56,7 +58,7 @@ namespace RimworldTogether.GameClient.Network
 
                     isConnectedToServer = true;
 
-                    serverListener = new ServerListener(new(ip, int.Parse(port)));
+                    listener = new Listener(new(ip, int.Parse(port)));
 
                     return true;
                 }
@@ -64,42 +66,28 @@ namespace RimworldTogether.GameClient.Network
             }
         }
 
+        //Disconnects client from the server
+
         public static void DisconnectFromServer()
         {
-            Action toDo = delegate
+            listener.DestroyConnection();
+
+            Log.Message($"[Rimworld Together] > Disconnected from server");
+
+            if (ClientValues.isQuiting) DisconnectionManager.QuitGame();
+            else
             {
-                serverListener.connection.Dispose();
-
-                Action r1 = delegate
-                {
-                    if (Current.ProgramState == ProgramState.Playing)
-                    {
-                        DisconnectionManager.DisconnectToMenu();
-                    }
-                };
-
-                DialogManager.PushNewDialog(new RT_Dialog_Error_Loop(new string[]
-                {
-                        "Connection to the server has been lost!",
-                        "Game will now quit to menu"
-                }, r1));
-
-                ClearAllValues();
-
-                Log.Message($"[Rimworld Together] > Disconnected from server");
-            };
-
-            Main.threadDispatcher.Enqueue(toDo);
+                DialogManager.PushNewDialog(new RT_Dialog_Error("Connection to the server has been lost!",
+                    delegate { DisconnectionManager.DisconnectToMenu(); }));
+            }
         }
 
-        public static void ClearAllValues()
+        //Clears all related values
+
+        public static void CleanValues()
         {
             isTryingToConnect = false;
             isConnectedToServer = false;
-
-            ClientValues.CleanValues();
-            ServerValues.CleanValues();
-            ChatManager.ClearChat();
         }
     }
 }

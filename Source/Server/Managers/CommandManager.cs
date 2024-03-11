@@ -1,18 +1,12 @@
-﻿using RimworldTogether.GameServer.Network;
-using RimworldTogether.Shared.JSON;
-using RimworldTogether.Shared.JSON.Actions;
-using RimworldTogether.Shared.Network;
-using RimworldTogether.Shared.Serializers;
-using Shared.Misc;
+﻿using Shared;
 
-
-namespace RimworldTogether.GameServer.Managers
+namespace GameServer
 {
     public static class CommandManager
     {
         public static void ParseCommand(Packet packet)
         {
-            CommandDetailsJSON commandDetailsJSON = (CommandDetailsJSON)ObjectConverter.ConvertBytesToObject(packet.contents);
+            CommandDetailsJSON commandDetailsJSON = (CommandDetailsJSON)Serializer.ConvertBytesToObject(packet.contents);
 
             switch (int.Parse(commandDetailsJSON.commandType))
             {
@@ -21,18 +15,6 @@ namespace RimworldTogether.GameServer.Managers
                     break;
 
                 case (int)CommonEnumerators.CommandType.Deop:
-                    //Do nothing
-                    break;
-
-                case (int)CommonEnumerators.CommandType.Ban:
-                    //Do nothing
-                    break;
-
-                case (int)CommonEnumerators.CommandType.Disconnect:
-                    //Do nothing
-                    break;
-
-                case (int)CommonEnumerators.CommandType.Quit:
                     //Do nothing
                     break;
 
@@ -47,8 +29,8 @@ namespace RimworldTogether.GameServer.Managers
             CommandDetailsJSON commandDetailsJSON = new CommandDetailsJSON();
             commandDetailsJSON.commandType = ((int)CommonEnumerators.CommandType.Op).ToString();
 
-            Packet packet = Packet.CreatePacketFromJSON("CommandPacket", commandDetailsJSON);
-            client.clientListener.SendData(packet);
+            Packet packet = Packet.CreatePacketFromJSON(nameof(PacketHandler.CommandPacket), commandDetailsJSON);
+            client.listener.EnqueuePacket(packet);
         }
 
         public static void SendDeOpCommand(ServerClient client)
@@ -56,38 +38,9 @@ namespace RimworldTogether.GameServer.Managers
             CommandDetailsJSON commandDetailsJSON = new CommandDetailsJSON();
             commandDetailsJSON.commandType = ((int)CommonEnumerators.CommandType.Deop).ToString();
 
-            Packet packet = Packet.CreatePacketFromJSON("CommandPacket", commandDetailsJSON);
-            client.clientListener.SendData(packet);
+            Packet packet = Packet.CreatePacketFromJSON(nameof(PacketHandler.CommandPacket), commandDetailsJSON);
+            client.listener.EnqueuePacket(packet);
 
-        }
-
-        public static void SendBanCommand(ServerClient client)
-        {
-            CommandDetailsJSON commandDetailsJSON = new CommandDetailsJSON();
-            commandDetailsJSON.commandType = ((int)CommonEnumerators.CommandType.Ban).ToString();
-
-            Packet packet = Packet.CreatePacketFromJSON("CommandPacket", commandDetailsJSON);
-            client.clientListener.SendData(packet);
-
-        }
-
-        public static void SendDisconnectCommand(ServerClient client)
-        {
-            CommandDetailsJSON commandDetailsJSON = new CommandDetailsJSON();
-            commandDetailsJSON.commandType = ((int)CommonEnumerators.CommandType.Disconnect).ToString();
-
-            Packet packet = Packet.CreatePacketFromJSON("CommandPacket", commandDetailsJSON);
-            client.clientListener.SendData(packet);
-
-        }
-
-        public static void SendQuitCommand(ServerClient client)
-        {
-            CommandDetailsJSON commandDetailsJSON = new CommandDetailsJSON();
-            commandDetailsJSON.commandType = ((int)CommonEnumerators.CommandType.Quit).ToString();
-
-            Packet packet = Packet.CreatePacketFromJSON("CommandPacket", commandDetailsJSON);
-            client.clientListener.SendData(packet);
         }
 
         public static void SendEventCommand(ServerClient client, int eventID)
@@ -96,8 +49,8 @@ namespace RimworldTogether.GameServer.Managers
             eventDetailsJSON.eventStepMode = ((int)CommonEnumerators.EventStepMode.Receive).ToString();
             eventDetailsJSON.eventID = eventID.ToString();
 
-            Packet packet = Packet.CreatePacketFromJSON("EventPacket", eventDetailsJSON);
-            client.clientListener.SendData(packet);
+            Packet packet = Packet.CreatePacketFromJSON(nameof(PacketHandler.EventPacket), eventDetailsJSON);
+            client.listener.EnqueuePacket(packet);
         }
 
         public static void SendBroadcastCommand(string str)
@@ -106,10 +59,10 @@ namespace RimworldTogether.GameServer.Managers
             commandDetailsJSON.commandType = ((int)CommonEnumerators.CommandType.Broadcast).ToString();
             commandDetailsJSON.commandDetails = str;
 
-            Packet packet = Packet.CreatePacketFromJSON("CommandPacket", commandDetailsJSON);
-            foreach (ServerClient client in Network.Network.connectedClients.ToArray())
+            Packet packet = Packet.CreatePacketFromJSON(nameof(PacketHandler.CommandPacket), commandDetailsJSON);
+            foreach (ServerClient client in Network.connectedClients.ToArray())
             {
-                client.clientListener.SendData(packet);
+                client.listener.EnqueuePacket(packet);
             }
         }
 
@@ -118,8 +71,8 @@ namespace RimworldTogether.GameServer.Managers
             CommandDetailsJSON commandDetailsJSON = new CommandDetailsJSON();
             commandDetailsJSON.commandType = ((int)CommonEnumerators.CommandType.ForceSave).ToString();
 
-            Packet packet = Packet.CreatePacketFromJSON("CommandPacket", commandDetailsJSON);
-            client.clientListener.SendData(packet);
+            Packet packet = Packet.CreatePacketFromJSON(nameof(PacketHandler.CommandPacket), commandDetailsJSON);
+            client.listener.EnqueuePacket(packet);
         }
     }
 }

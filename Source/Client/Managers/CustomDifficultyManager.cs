@@ -1,8 +1,7 @@
-﻿using RimworldTogether.Shared.JSON;
-using RimworldTogether.Shared.Network;
+﻿using Shared;
 using Verse;
 
-namespace RimworldTogether.GameClient.Managers
+namespace GameClient
 {
     public static class CustomDifficultyManager
     {
@@ -52,17 +51,27 @@ namespace RimworldTogether.GameClient.Managers
 
             DifficultyValues.DiseaseIntervalFactor = serverOverallJSON.DiseaseIntervalFactor;
 
+            DifficultyValues.EnemyReproductionRateFactor = serverOverallJSON.EnemyReproductionRateFactor;
+
             DifficultyValues.DeepDrillInfestationChanceFactor = serverOverallJSON.DeepDrillInfestationChanceFactor;
 
             DifficultyValues.FriendlyFireChanceFactor = serverOverallJSON.FriendlyFireChanceFactor;
 
             DifficultyValues.AllowInstantKillChance = serverOverallJSON.AllowInstantKillChance;
 
+            DifficultyValues.PeacefulTemples = serverOverallJSON.PeacefulTemples;
+
+            DifficultyValues.AllowCaveHives = serverOverallJSON.AllowCaveHives;
+
+            DifficultyValues.UnwaveringPrisoners = serverOverallJSON.UnwaveringPrisoners;
+
             DifficultyValues.AllowTraps = serverOverallJSON.AllowTraps;
 
             DifficultyValues.AllowTurrets = serverOverallJSON.AllowTurrets;
 
             DifficultyValues.AllowMortars = serverOverallJSON.AllowMortars;
+
+            DifficultyValues.ClassicMortars = serverOverallJSON.ClassicMortars;
 
             DifficultyValues.AdaptationEffectFactor = serverOverallJSON.AdaptationEffectFactor;
 
@@ -131,17 +140,27 @@ namespace RimworldTogether.GameClient.Managers
 
             difficultyValuesJSON.DiseaseIntervalFactor = Current.Game.storyteller.difficulty.diseaseIntervalFactor;
 
+            difficultyValuesJSON.EnemyReproductionRateFactor = Current.Game.storyteller.difficulty.enemyReproductionRateFactor;
+
             difficultyValuesJSON.DeepDrillInfestationChanceFactor = Current.Game.storyteller.difficulty.deepDrillInfestationChanceFactor;
 
             difficultyValuesJSON.FriendlyFireChanceFactor = Current.Game.storyteller.difficulty.friendlyFireChanceFactor;
 
             difficultyValuesJSON.AllowInstantKillChance = Current.Game.storyteller.difficulty.allowInstantKillChance;
 
+            difficultyValuesJSON.PeacefulTemples = Current.Game.storyteller.difficulty.peacefulTemples;
+
+            difficultyValuesJSON.AllowCaveHives = Current.Game.storyteller.difficulty.allowCaveHives;
+
+            difficultyValuesJSON.UnwaveringPrisoners = Current.Game.storyteller.difficulty.unwaveringPrisoners;
+
             difficultyValuesJSON.AllowTraps = Current.Game.storyteller.difficulty.allowTraps;
 
             difficultyValuesJSON.AllowTurrets = Current.Game.storyteller.difficulty.allowTurrets;
 
             difficultyValuesJSON.AllowMortars = Current.Game.storyteller.difficulty.allowMortars;
+
+            difficultyValuesJSON.ClassicMortars = Current.Game.storyteller.difficulty.classicMortars;
 
             difficultyValuesJSON.AdaptationEffectFactor = Current.Game.storyteller.difficulty.adaptationEffectFactor;
 
@@ -163,8 +182,8 @@ namespace RimworldTogether.GameClient.Managers
 
             difficultyValuesJSON.WastepackInfestationChanceFactor = Current.Game.storyteller.difficulty.wastepackInfestationChanceFactor;
 
-            Packet packet = Packet.CreatePacketFromJSON("CustomDifficultyPacket", difficultyValuesJSON);
-            Network.Network.serverListener.SendData(packet);
+            Packet packet = Packet.CreatePacketFromJSON(nameof(PacketHandler.CustomDifficultyPacket), difficultyValuesJSON);
+            Network.listener.EnqueuePacket(packet);
         }
 
         public static void EnforceCustomDifficulty()
@@ -214,17 +233,27 @@ namespace RimworldTogether.GameClient.Managers
 
                 Current.Game.storyteller.difficulty.diseaseIntervalFactor = DifficultyValues.DiseaseIntervalFactor;
 
+                Current.Game.storyteller.difficulty.enemyReproductionRateFactor = DifficultyValues.EnemyReproductionRateFactor;
+
                 Current.Game.storyteller.difficulty.deepDrillInfestationChanceFactor = DifficultyValues.DeepDrillInfestationChanceFactor;
 
                 Current.Game.storyteller.difficulty.friendlyFireChanceFactor = DifficultyValues.FriendlyFireChanceFactor;
 
                 Current.Game.storyteller.difficulty.allowInstantKillChance = DifficultyValues.AllowInstantKillChance;
 
+                Current.Game.storyteller.difficulty.peacefulTemples = DifficultyValues.PeacefulTemples;
+
+                Current.Game.storyteller.difficulty.allowCaveHives = DifficultyValues.AllowCaveHives;
+
+                Current.Game.storyteller.difficulty.unwaveringPrisoners = DifficultyValues.UnwaveringPrisoners;
+
                 Current.Game.storyteller.difficulty.allowTraps = DifficultyValues.AllowTraps;
 
                 Current.Game.storyteller.difficulty.allowTurrets = DifficultyValues.AllowTurrets;
 
                 Current.Game.storyteller.difficulty.allowMortars = DifficultyValues.AllowMortars;
+
+                Current.Game.storyteller.difficulty.classicMortars = DifficultyValues.ClassicMortars;
 
                 Current.Game.storyteller.difficulty.adaptationEffectFactor = DifficultyValues.AdaptationEffectFactor;
 
@@ -295,17 +324,27 @@ namespace RimworldTogether.GameClient.Managers
 
         public static float DiseaseIntervalFactor;
 
+        public static float EnemyReproductionRateFactor;
+
         public static float DeepDrillInfestationChanceFactor;
 
         public static float FriendlyFireChanceFactor;
 
         public static float AllowInstantKillChance;
 
+        public static bool PeacefulTemples;
+
+        public static bool AllowCaveHives;
+
+        public static bool UnwaveringPrisoners;
+
         public static bool AllowTraps;
 
         public static bool AllowTurrets;
 
         public static bool AllowMortars;
+
+        public static bool ClassicMortars;
 
         public static float AdaptationEffectFactor;
 

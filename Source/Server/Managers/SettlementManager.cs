@@ -1,20 +1,12 @@
-﻿using RimworldTogether.GameServer.Core;
-using RimworldTogether.GameServer.Files;
-using RimworldTogether.GameServer.Managers.Actions;
-using RimworldTogether.GameServer.Misc;
-using RimworldTogether.GameServer.Network;
-using RimworldTogether.Shared.JSON;
-using RimworldTogether.Shared.Network;
-using RimworldTogether.Shared.Serializers;
-using Shared.Misc;
+﻿using Shared;
 
-namespace RimworldTogether.GameServer.Managers
+namespace GameServer
 {
     public static class SettlementManager
     {
         public static void ParseSettlementPacket(ServerClient client, Packet packet)
         {
-            SettlementDetailsJSON settlementDetailsJSON = (SettlementDetailsJSON)ObjectConverter.ConvertBytesToObject(packet.contents);
+            SettlementDetailsJSON settlementDetailsJSON = (SettlementDetailsJSON)Serializer.ConvertBytesToObject(packet.contents);
 
             switch (int.Parse(settlementDetailsJSON.settlementStepMode))
             {
@@ -38,18 +30,18 @@ namespace RimworldTogether.GameServer.Managers
                 SettlementFile settlementFile = new SettlementFile();
                 settlementFile.tile = settlementDetailsJSON.tile;
                 settlementFile.owner = client.username;
-                Serializer.SerializeToFile(Path.Combine(Program.settlementsPath, settlementFile.tile + ".json"), settlementFile);
+                Serializer.SerializeToFile(Path.Combine(Master.settlementsPath, settlementFile.tile + ".json"), settlementFile);
 
                 settlementDetailsJSON.settlementStepMode = ((int)CommonEnumerators.SettlementStepMode.Add).ToString();
-                foreach (ServerClient cClient in Network.Network.connectedClients.ToArray())
+                foreach (ServerClient cClient in Network.connectedClients.ToArray())
                 {
                     if (cClient == client) continue;
                     else
                     {
                         settlementDetailsJSON.value = LikelihoodManager.GetSettlementLikelihood(cClient, settlementFile).ToString();
 
-                        Packet rPacket = Packet.CreatePacketFromJSON("SettlementPacket", settlementDetailsJSON);
-                        cClient.clientListener.SendData(rPacket);
+                        Packet rPacket = Packet.CreatePacketFromJSON(nameof(PacketHandler.SettlementPacket), settlementDetailsJSON);
+                        cClient.listener.EnqueuePacket(rPacket);
                     }
                 }
 
@@ -68,14 +60,14 @@ namespace RimworldTogether.GameServer.Managers
                 if (settlementFile.owner != client.username) ResponseShortcutManager.SendIllegalPacket(client);
                 else
                 {
-                    File.Delete(Path.Combine(Program.settlementsPath, settlementFile.tile + ".json"));
+                    File.Delete(Path.Combine(Master.settlementsPath, settlementFile.tile + ".json"));
 
                     settlementDetailsJSON.settlementStepMode = ((int)CommonEnumerators.SettlementStepMode.Remove).ToString();
-                    Packet rPacket = Packet.CreatePacketFromJSON("SettlementPacket", settlementDetailsJSON);
-                    foreach (ServerClient cClient in Network.Network.connectedClients.ToArray())
+                    Packet rPacket = Packet.CreatePacketFromJSON(nameof(PacketHandler.SettlementPacket), settlementDetailsJSON);
+                    foreach (ServerClient cClient in Network.connectedClients.ToArray())
                     {
                         if (cClient == client) continue;
-                        else cClient.clientListener.SendData(rPacket);
+                        else cClient.listener.EnqueuePacket(rPacket);
                     }
 
                     Logger.WriteToConsole($"[Remove settlement] > {settlementDetailsJSON.tile} > {client.username}", Logger.LogMode.Warning);
@@ -84,7 +76,7 @@ namespace RimworldTogether.GameServer.Managers
 
             else
             {
-                File.Delete(Path.Combine(Program.settlementsPath, settlementFile.tile + ".json"));
+                File.Delete(Path.Combine(Master.settlementsPath, settlementFile.tile + ".json"));
 
                 Logger.WriteToConsole($"[Remove settlement] > {settlementFile.tile}", Logger.LogMode.Warning);
             }
@@ -92,7 +84,7 @@ namespace RimworldTogether.GameServer.Managers
 
         public static bool CheckIfTileIsInUse(string tileToCheck)
         {
-            string[] settlements = Directory.GetFiles(Program.settlementsPath);
+            string[] settlements = Directory.GetFiles(Master.settlementsPath);
             foreach(string settlement in settlements)
             {
                 SettlementFile settlementJSON = Serializer.SerializeFromFile<SettlementFile>(settlement);
@@ -104,7 +96,7 @@ namespace RimworldTogether.GameServer.Managers
 
         public static SettlementFile GetSettlementFileFromTile(string tileToGet)
         {
-            string[] settlements = Directory.GetFiles(Program.settlementsPath);
+            string[] settlements = Directory.GetFiles(Master.settlementsPath);
             foreach (string settlement in settlements)
             {
                 SettlementFile settlementFile = Serializer.SerializeFromFile<SettlementFile>(settlement);
@@ -116,7 +108,7 @@ namespace RimworldTogether.GameServer.Managers
 
         public static SettlementFile GetSettlementFileFromUsername(string usernameToGet)
         {
-            string[] settlements = Directory.GetFiles(Program.settlementsPath);
+            string[] settlements = Directory.GetFiles(Master.settlementsPath);
             foreach (string settlement in settlements)
             {
                 SettlementFile settlementFile = Serializer.SerializeFromFile<SettlementFile>(settlement);
@@ -130,7 +122,7 @@ namespace RimworldTogether.GameServer.Managers
         {
             List<SettlementFile> settlementList = new List<SettlementFile>();
 
-            string[] settlements = Directory.GetFiles(Program.settlementsPath);
+            string[] settlements = Directory.GetFiles(Master.settlementsPath);
             foreach (string settlement in settlements)
             {
                 settlementList.Add(Serializer.SerializeFromFile<SettlementFile>(settlement));
@@ -143,7 +135,7 @@ namespace RimworldTogether.GameServer.Managers
         {
             List<SettlementFile> settlementList = new List<SettlementFile>();
 
-            string[] settlements = Directory.GetFiles(Program.settlementsPath);
+            string[] settlements = Directory.GetFiles(Master.settlementsPath);
             foreach (string settlement in settlements)
             {
                 SettlementFile settlementFile = Serializer.SerializeFromFile<SettlementFile>(settlement);

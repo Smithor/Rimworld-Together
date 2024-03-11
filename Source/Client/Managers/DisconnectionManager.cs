@@ -1,29 +1,37 @@
-﻿using RimworldTogether.GameClient.Dialogs;
-using RimworldTogether.GameClient.Managers.Actions;
-using RimworldTogether.GameClient.Values;
-using UnityEngine.SceneManagement;
-using Verse;
+﻿using Verse;
 
-namespace RimworldTogether.GameClient.Managers
+namespace GameClient
 {
+    //Class that contains all the disconnection functions that the mod uses
+
     public static class DisconnectionManager
     {
+        //Kicks the client into the main menu
+
         public static void DisconnectToMenu()
         {
-            ChatManager.ClearChat();
+            Network.CleanValues();
+            ChatManager.CleanChat();
             ClientValues.CleanValues();
             ServerValues.CleanValues();
             ClientValues.ToggleDisconnecting(false);
 
-            SceneManager.LoadScene(0, LoadSceneMode.Single);
-            Current.ProgramState = ProgramState.Entry;
+            if (Current.ProgramState != ProgramState.Entry)
+            {
+                LongEventHandler.QueueLongEvent(delegate { }, 
+                    "Entry", "", doAsynchronously: false, null);
+            }
         }
+
+        //Kicks the client into closing the game
 
         public static void QuitGame()
         {
             ClientValues.ToggleQuiting(false);
             Root.Shutdown();
         }
+
+        //Kicks the client into restarting the game
 
         public static void RestartGame(bool desync)
         {
@@ -32,7 +40,6 @@ namespace RimworldTogether.GameClient.Managers
                 DialogManager.PushNewDialog(new RT_Dialog_OK("The game will restart to prevent save desyncs",
                     delegate { GenCommandLine.Restart(); }));
             }
-
             else GenCommandLine.Restart();
         }
     }

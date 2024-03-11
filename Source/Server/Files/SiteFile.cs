@@ -1,4 +1,4 @@
-﻿namespace RimworldTogether.GameServer.Files
+﻿namespace GameServer
 {
     [Serializable]
     public class SiteFile
@@ -9,7 +9,7 @@
 
         public string type;
 
-        public string workerData;
+        public byte[] workerData;
 
         public bool isFromFaction;
 

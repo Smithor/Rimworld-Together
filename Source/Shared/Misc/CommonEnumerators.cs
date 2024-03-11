@@ -1,10 +1,14 @@
-﻿namespace Shared.Misc
+﻿namespace Shared
 {
     public class CommonEnumerators
     {
+        public enum FetchMode { Host, Player }
+
+        public enum SearchLocation { Caravan, Settlement }
+
         //Commands
 
-        public enum CommandType { Op, Deop, Ban, Disconnect, Quit, Broadcast, ForceSave }
+        public enum CommandType { Op, Deop, Broadcast, ForceSave }
 
         //Events
 
@@ -53,7 +57,7 @@
 
         //Sites
 
-        public enum SiteStepMode { Accept, Build, Destroy, Info, Deposit, Retrieve, Reward }
+        public enum SiteStepMode { Accept, Build, Destroy, Info, Deposit, Retrieve, Reward, WorkerError }
 
         //Spying
 
@@ -71,9 +75,7 @@
 
         //Saving
 
-        public enum SaveStepMode { Disconnect, Quit, Autosave, Transfer, Event }
-
-        public enum SaveMode { Disconnect, Quit, Autosave, Transfer, Event }
+        public enum SaveMode { Disconnect, Autosave }
 
         //Chat
 
@@ -95,11 +97,12 @@
             ExtraLogin, 
             WrongMods, 
             ServerFull,
-            Whitelist
+            Whitelist,
+            WrongVersion
         }
 
         //World generation
 
-        public enum WorldStepMode { Required, Existing, Saved }
+        public enum WorldStepMode { Required, Existing }
     }
 }

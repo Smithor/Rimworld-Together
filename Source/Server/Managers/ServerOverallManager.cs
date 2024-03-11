@@ -1,11 +1,6 @@
-﻿using RimworldTogether.GameServer.Core;
-using RimworldTogether.GameServer.Files;
-using RimworldTogether.GameServer.Managers.Actions;
-using RimworldTogether.GameServer.Network;
-using RimworldTogether.Shared.JSON;
-using RimworldTogether.Shared.Network;
+﻿using Shared;
 
-namespace RimworldTogether.GameServer.Managers
+namespace GameServer
 {
     public static class ServerOverallManager
     {
@@ -29,13 +24,13 @@ namespace RimworldTogether.GameServer.Managers
 
             so = GetActionsCost(client, so);
 
-            Packet packet = Packet.CreatePacketFromJSON("ServerValuesPacket", so);
-            client.clientListener.SendData(packet);
+            Packet packet = Packet.CreatePacketFromJSON(nameof(PacketHandler.ServerValuesPacket), so);
+            client.listener.EnqueuePacket(packet);
         }
 
         private static ServerOverallJSON GetServerValues(ServerOverallJSON so)
         {
-            ServerValuesFile svf = Program.serverValues;
+            ServerValuesFile svf = Master.serverValues;
             so.AllowCustomScenarios = svf.AllowCustomScenarios;
 
             return so;
@@ -52,7 +47,7 @@ namespace RimworldTogether.GameServer.Managers
 
         private static ServerOverallJSON GetEventCosts(ServerOverallJSON so)
         {
-            EventValuesFile ev = Program.eventValues;
+            EventValuesFile ev = Master.eventValues;
             so.RaidCost = ev.RaidCost;
             so.InfestationCost = ev.InfestationCost;
             so.MechClusterCost = ev.MechClusterCost;
@@ -68,7 +63,7 @@ namespace RimworldTogether.GameServer.Managers
 
         private static ServerOverallJSON GetSiteDetails(ServerOverallJSON so)
         {
-            SiteValuesFile sv = Program.siteValues;
+            SiteValuesFile sv = Master.siteValues;
             so.PersonalFarmlandCost = sv.PersonalFarmlandCost;
             so.FactionFarmlandCost = sv.FactionFarmlandCost;
             so.FarmlandRewardCount = sv.FarmlandRewardCount;
@@ -110,7 +105,7 @@ namespace RimworldTogether.GameServer.Managers
 
         private static ServerOverallJSON GetServerDifficulty(ServerOverallJSON so)
         {
-            DifficultyValuesFile dv = Program.difficultyValues;
+            DifficultyValuesFile dv = Master.difficultyValues;
             so.UsingCustomDifficulty = dv.UseCustomDifficulty;
             so.ThreatScale = dv.ThreatScale;
             so.ThreatScale = dv.ThreatScale;
@@ -134,12 +129,17 @@ namespace RimworldTogether.GameServer.Managers
             so.ManhunterChanceOnDamageFactor = dv.ManhunterChanceOnDamageFactor;
             so.PlayerPawnInfectionChanceFactor = dv.PlayerPawnInfectionChanceFactor;
             so.DiseaseIntervalFactor = dv.DiseaseIntervalFactor;
+            so.EnemyReproductionRateFactor = dv.EnemyReproductionRateFactor;
             so.DeepDrillInfestationChanceFactor = dv.DeepDrillInfestationChanceFactor;
             so.FriendlyFireChanceFactor = dv.FriendlyFireChanceFactor;
             so.AllowInstantKillChance = dv.AllowInstantKillChance;
+            so.PeacefulTemples = dv.PeacefulTemples;
+            so.AllowCaveHives = dv.AllowCaveHives;
+            so.UnwaveringPrisoners = dv.UnwaveringPrisoners;
             so.AllowTraps = dv.AllowTraps;
             so.AllowTurrets = dv.AllowTurrets;
             so.AllowMortars = dv.AllowMortars;
+            so.ClassicMortars = dv.ClassicMortars;
             so.AdaptationEffectFactor = dv.AdaptationEffectFactor;
             so.AdaptationGrowthRateFactorOverZero = dv.AdaptationGrowthRateFactorOverZero;
             so.FixedWealthMode = dv.FixedWealthMode;
@@ -188,7 +188,7 @@ namespace RimworldTogether.GameServer.Managers
 
         private static ServerOverallJSON GetActionsCost(ServerClient client, ServerOverallJSON so)
         {
-            ActionValuesFile av = Program.actionValues;
+            ActionValuesFile av = Master.actionValues;
 
             so.SpyCost = av.SpyCost;
 

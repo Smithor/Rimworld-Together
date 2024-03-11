@@ -1,17 +1,14 @@
 ﻿using System.Collections.Generic;
 using RimWorld;
 using RimWorld.Planet;
-using RimworldTogether.GameClient.Managers.Actions;
-using RimworldTogether.Shared.JSON.Actions;
+using Shared;
 using Verse;
 
-namespace RimworldTogether.GameClient.Values
+namespace GameClient
 {
     public static class ClientValues
     {
         public static bool needsToGenerateWorld;
-
-        public static bool isLoadingPrefabWorld;
 
         public static bool isSaving;
 
@@ -20,6 +17,8 @@ namespace RimworldTogether.GameClient.Values
         public static bool isQuiting;
 
         public static bool isReadyToPlay;
+
+        public static bool requireSaveManipulation;
 
         //Do not change manually
         public static bool autoDenyTransfers;
@@ -46,7 +45,6 @@ namespace RimworldTogether.GameClient.Values
         public static int autosaveDays = 1;
         public static float autosaveCurrentTicks;
         public static float autosaveInternalTicks = autosaveDays * 60000f;
-        public static string versionCode = "1.0.8";
 
         public static string[] serverBrowserContainer = new string[] { "127.0.0.1|25555" };
 
@@ -59,8 +57,6 @@ namespace RimworldTogether.GameClient.Values
         }
 
         public static void ToggleGenerateWorld(bool mode) { needsToGenerateWorld = mode; }
-
-        public static void ToggleLoadingPrefabWorld(bool mode) { isLoadingPrefabWorld = mode; }
 
         public static void ToggleSaving(bool mode) { isSaving = mode; }
 
@@ -76,16 +72,18 @@ namespace RimworldTogether.GameClient.Values
 
         public static void ToggleChatScroll(bool mode) { ChatManager.shouldScrollChat = mode; }
 
+        public static void ToggleRequireSaveManipulation(bool mode) { requireSaveManipulation = mode; }
+
         public static void CleanValues()
         {
-            needsToGenerateWorld = false;
-            isLoadingPrefabWorld = false;
-            isSaving = false;
-            isDisconnecting = false;
-            isQuiting = false;
-            isReadyToPlay = false;
-            isInTransfer = false;
-            isInVisit = false;
+            ToggleGenerateWorld(false);
+            ToggleSaving(false);
+            ToggleDisconnecting(false);
+            ToggleQuiting(false);
+            ToggleReadyToPlay(false);
+            ToggleTransfer(false);
+            ToggleVisit(false);
+            ToggleRequireSaveManipulation(false);
 
             chosenSettlement = null;
             chosenCaravan = null;

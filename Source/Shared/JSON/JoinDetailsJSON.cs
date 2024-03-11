@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace RimworldTogether.Shared.JSON
+namespace Shared
 {
     [Serializable]
     public class JoinDetailsJSON
@@ -16,6 +16,6 @@ namespace RimworldTogether.Shared.JSON
 
         public List<string> runningMods = new List<string>();
 
-        public List<string> conflictingMods = new List<string>();
+        public List<string> extraDetails = new List<string>();
     }
 }

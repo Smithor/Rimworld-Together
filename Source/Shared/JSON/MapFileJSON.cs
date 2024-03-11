@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Shared.JSON
+namespace Shared
 {
     [Serializable]
     public class MapFileJSON
@@ -8,8 +8,6 @@ namespace Shared.JSON
         public string mapOwner;
 
         public string mapTile;
-
-        public string mapMode;
 
         public byte[] mapData;
     }

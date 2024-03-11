@@ -1,17 +1,12 @@
-﻿using RimworldTogether.GameServer.Files;
-using RimworldTogether.GameServer.Misc;
-using RimworldTogether.GameServer.Network;
-using RimworldTogether.Shared.JSON;
-using RimworldTogether.Shared.Network;
-using RimworldTogether.Shared.Serializers;
+﻿using Shared;
 
-namespace RimworldTogether.GameServer.Managers
+namespace GameServer
 {
     public static class CustomDifficultyManager
     {
         public static void ParseDifficultyPacket(ServerClient client, Packet packet)
         {
-            DifficultyValuesJSON difficultyValuesJSON = (DifficultyValuesJSON)ObjectConverter.ConvertBytesToObject(packet.contents);
+            DifficultyValuesJSON difficultyValuesJSON = (DifficultyValuesJSON)Serializer.ConvertBytesToObject(packet.contents);
             SetCustomDifficulty(client, difficultyValuesJSON);
         }
 
@@ -64,17 +59,27 @@ namespace RimworldTogether.GameServer.Managers
 
                 newDifficultyValues.DiseaseIntervalFactor = difficultyValuesJSON.DiseaseIntervalFactor;
 
+                newDifficultyValues.EnemyReproductionRateFactor = difficultyValuesJSON.EnemyReproductionRateFactor;
+
                 newDifficultyValues.DeepDrillInfestationChanceFactor = difficultyValuesJSON.DeepDrillInfestationChanceFactor;
 
                 newDifficultyValues.FriendlyFireChanceFactor = difficultyValuesJSON.FriendlyFireChanceFactor;
 
                 newDifficultyValues.AllowInstantKillChance = difficultyValuesJSON.AllowInstantKillChance;
 
+                newDifficultyValues.PeacefulTemples = difficultyValuesJSON.PeacefulTemples;
+
+                newDifficultyValues.AllowCaveHives = difficultyValuesJSON.AllowCaveHives;
+
+                newDifficultyValues.UnwaveringPrisoners = difficultyValuesJSON.UnwaveringPrisoners;
+
                 newDifficultyValues.AllowTraps = difficultyValuesJSON.AllowTraps;
 
                 newDifficultyValues.AllowTurrets = difficultyValuesJSON.AllowTurrets;
 
                 newDifficultyValues.AllowMortars = difficultyValuesJSON.AllowMortars;
+
+                newDifficultyValues.ClassicMortars = difficultyValuesJSON.ClassicMortars;
 
                 newDifficultyValues.AdaptationEffectFactor = difficultyValuesJSON.AdaptationEffectFactor;
 
@@ -104,27 +109,25 @@ namespace RimworldTogether.GameServer.Managers
 
         public static void SaveCustomDifficulty(DifficultyValuesFile newDifficultyValues)
         {
-            string path = Path.Combine(Core.Program.corePath, "DifficultyValues.json");
+            string path = Path.Combine(Master.corePath, "DifficultyValues.json");
 
             Serializer.SerializeToFile(path, newDifficultyValues);
-
-            Logger.WriteToConsole("Saved difficulty values");
 
             LoadCustomDifficulty();
         }
 
         public static void LoadCustomDifficulty()
         {
-            string path = Path.Combine(Core.Program.corePath, "DifficultyValues.json");
+            string path = Path.Combine(Master.corePath, "DifficultyValues.json");
 
-            if (File.Exists(path)) Core.Program.difficultyValues = Serializer.SerializeFromFile<DifficultyValuesFile>(path);
+            if (File.Exists(path)) Master.difficultyValues = Serializer.SerializeFromFile<DifficultyValuesFile>(path);
             else
             {
-                Core.Program.difficultyValues = new DifficultyValuesFile();
-                Serializer.SerializeToFile(path, Core.Program.difficultyValues);
+                Master.difficultyValues = new DifficultyValuesFile();
+                Serializer.SerializeToFile(path, Master.difficultyValues);
             }
 
-            Logger.WriteToConsole("Loaded difficulty values");
+            Logger.WriteToConsole("Loaded difficulty values", Logger.LogMode.Warning);
         }
     }
 }

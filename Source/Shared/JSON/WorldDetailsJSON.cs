@@ -1,20 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace RimworldTogether.Shared.JSON
+namespace Shared
 {
     [Serializable]
     public class WorldDetailsJSON
     {
         public string worldStepMode;
 
-        public string SeedString;
-        public float PlanetCoverage;
-        public float Rainfall;
-        public float Temperature;
-        public float Population;
-        public float Pollution;
+        public string seedString;
+        public int persistentRandomValue;
+        public string planetCoverage;
+        public string rainfall;
+        public string temperature;
+        public string population;
+        public string pollution;
+        public List<string> factions = new List<string>();
 
-        public List<string> Factions = new List<string>();
+        public string tileBiomeDeflate;
+        public string tileElevationDeflate;
+        public string tileHillinessDeflate;
+        public string tileTemperatureDeflate;
+        public string tileRainfallDeflate;
+        public string tileSwampinessDeflate;
+        public string tileFeatureDeflate;
+        public string tilePollutionDeflate;
+        public string tileRoadOriginsDeflate;
+        public string tileRoadAdjacencyDeflate;
+        public string tileRoadDefDeflate;
+        public string tileRiverOriginsDeflate;
+        public string tileRiverAdjacencyDeflate;
+        public string tileRiverDefDeflate;
     }
 }

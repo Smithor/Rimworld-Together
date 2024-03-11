@@ -1,18 +1,11 @@
 ﻿using HarmonyLib;
 using RimWorld;
-using RimworldTogether.GameClient.Core;
-using RimworldTogether.GameClient.Managers.Actions;
-using RimworldTogether.GameClient.Values;
-using RimworldTogether.Shared.Network;
-using RimworldTogether.Shared.Serializers;
-using Shared.JSON;
-using Shared.Misc;
-using Shared.Network;
+using Shared;
 using System.IO;
 using System.Reflection;
 using Verse;
 
-namespace RimworldTogether.GameClient.Managers
+namespace GameClient
 {
     public static class SaveManager
     {
@@ -27,72 +20,66 @@ namespace RimworldTogether.GameClient.Managers
                 FieldInfo FticksSinceSave = AccessTools.Field(typeof(Autosaver), "ticksSinceSave");
                 FticksSinceSave.SetValue(Current.Game.autosaver, 0);
                 Current.Game.autosaver.DoAutosave();
-                ClientValues.ToggleSaving(false);
             }
         }
 
         public static void ReceiveSavePartFromServer(Packet packet)
         {
-            FileTransferJSON fileTransferJSON = (FileTransferJSON)ObjectConverter.ConvertBytesToObject(packet.contents);
+            FileTransferJSON fileTransferJSON = (FileTransferJSON)Serializer.ConvertBytesToObject(packet.contents);
 
-            if (Network.Network.serverListener.downloadManager == null)
+            if (Network.listener.downloadManager == null)
             {
                 Log.Message($"[Rimworld Together] > Receiving save from server");
 
-                customSaveName = $"Server - {Network.Network.ip} - {ChatManager.username}";
-                string filePath = Path.Combine(new string[] { Main.savesPath, customSaveName + ".rws" });
+                customSaveName = $"Server - {Network.ip} - {ChatManager.username}";
+                string filePath = Path.Combine(new string[] { Master.savesFolderPath, customSaveName + ".rws" });
 
-                Network.Network.serverListener.downloadManager = new DownloadManager();
-                Network.Network.serverListener.downloadManager.PrepareDownload(filePath, fileTransferJSON.fileParts);
+                Network.listener.downloadManager = new DownloadManager();
+                Network.listener.downloadManager.PrepareDownload(filePath, fileTransferJSON.fileParts);
             }
 
-            Network.Network.serverListener.downloadManager.WriteFilePart(fileTransferJSON.fileBytes);
+            Network.listener.downloadManager.WriteFilePart(fileTransferJSON.fileBytes);
 
             if (fileTransferJSON.isLastPart)
             {
-                Network.Network.serverListener.downloadManager.FinishFileWrite();
-                Network.Network.serverListener.downloadManager = null;
+                Network.listener.downloadManager.FinishFileWrite();
+                Network.listener.downloadManager = null;
 
                 GameDataSaveLoader.LoadGame(customSaveName);
             }
 
             else
             {
-                Packet rPacket = Packet.CreatePacketFromJSON("RequestSavePartPacket");
-                Network.Network.serverListener.SendData(rPacket);
+                Packet rPacket = Packet.CreatePacketFromJSON(nameof(PacketHandler.RequestSavePartPacket));
+                Network.listener.EnqueuePacket(rPacket);
             }
         }
 
         public static void SendSavePartToServer(string fileName = null)
         {
-            if (Network.Network.serverListener.uploadManager == null)
+            if (Network.listener.uploadManager == null)
             {
                 Log.Message($"[Rimworld Together] > Sending save to server");
 
-                string filePath = Path.Combine(new string[] { Main.savesPath, fileName + ".rws" });
+                string filePath = Path.Combine(new string[] { Master.savesFolderPath, fileName + ".rws" });
 
-                Network.Network.serverListener.uploadManager = new UploadManager();
-                Network.Network.serverListener.uploadManager.PrepareUpload(filePath);
+                Network.listener.uploadManager = new UploadManager();
+                Network.listener.uploadManager.PrepareUpload(filePath);
             }
 
             FileTransferJSON fileTransferJSON = new FileTransferJSON();
-            fileTransferJSON.fileSize = Network.Network.serverListener.uploadManager.fileSize;
-            fileTransferJSON.fileParts = Network.Network.serverListener.uploadManager.fileParts;
-            fileTransferJSON.fileBytes = Network.Network.serverListener.uploadManager.ReadFilePart();
-            fileTransferJSON.isLastPart = Network.Network.serverListener.uploadManager.isLastPart;
+            fileTransferJSON.fileSize = Network.listener.uploadManager.fileSize;
+            fileTransferJSON.fileParts = Network.listener.uploadManager.fileParts;
+            fileTransferJSON.fileBytes = Network.listener.uploadManager.ReadFilePart();
+            fileTransferJSON.isLastPart = Network.listener.uploadManager.isLastPart;
 
-            if (ClientValues.isDisconnecting) fileTransferJSON.additionalInstructions = ((int)CommonEnumerators.SaveStepMode.Disconnect).ToString();
-            else if (ClientValues.isQuiting) fileTransferJSON.additionalInstructions = ((int)CommonEnumerators.SaveStepMode.Quit).ToString();
-            else if (ClientValues.isInTransfer) fileTransferJSON.additionalInstructions = ((int)CommonEnumerators.SaveStepMode.Transfer).ToString();
-            else fileTransferJSON.additionalInstructions = ((int)CommonEnumerators.SaveStepMode.Autosave).ToString();
+            if (ClientValues.isDisconnecting || ClientValues.isQuiting) fileTransferJSON.additionalInstructions = ((int)CommonEnumerators.SaveMode.Disconnect).ToString();
+            else fileTransferJSON.additionalInstructions = ((int)CommonEnumerators.SaveMode.Autosave).ToString();
 
-            Packet packet = Packet.CreatePacketFromJSON("ReceiveSavePartPacket", fileTransferJSON);
-            Network.Network.serverListener.SendData(packet);
+            Packet packet = Packet.CreatePacketFromJSON(nameof(PacketHandler.ReceiveSavePartPacket), fileTransferJSON);
+            Network.listener.EnqueuePacket(packet);
 
-            if (Network.Network.serverListener.uploadManager.isLastPart)
-            {
-                Network.Network.serverListener.uploadManager = null;
-            }
+            if (Network.listener.uploadManager.isLastPart) Network.listener.uploadManager = null;
         }
     }
 }

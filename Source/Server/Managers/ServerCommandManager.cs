@@ -1,10 +1,4 @@
-﻿using RimworldTogether.GameServer.Core;
-using RimworldTogether.GameServer.Files;
-using RimworldTogether.GameServer.Misc;
-using RimworldTogether.GameServer.Misc.Commands;
-using RimworldTogether.GameServer.Network;
-
-namespace RimworldTogether.GameServer.Managers
+﻿namespace GameServer
 {
     public static class ServerCommandManager
     {
@@ -171,11 +165,11 @@ namespace RimworldTogether.GameServer.Managers
             DeletePlayerCommandAction);
 
         private static ServerCommand enableDifficultyCommand = new ServerCommand("enabledifficulty", 0,
-            "Locks an editable save for use [WIP]",
+            "Enables custom difficulty in the server",
             EnableDifficultyCommandAction);
 
         private static ServerCommand disableDifficultyCommand = new ServerCommand("disabledifficulty", 0,
-            "Locks an editable save for use [WIP]",
+            "Disables custom difficulty in the server",
             DisableDifficultyCommandAction);
 
         private static ServerCommand quitCommand = new ServerCommand("quit", 0,
@@ -212,8 +206,6 @@ namespace RimworldTogether.GameServer.Managers
             deletePlayerCommand,
             enableDifficultyCommand,
             disableDifficultyCommand,
-            //lockSaveCommand,
-            //unlockSaveCommand,
             quitCommand,
             forceQuitCommand
         };
@@ -231,9 +223,9 @@ namespace RimworldTogether.GameServer.Managers
 
         private static void ListCommandAction()
         {
-            Logger.WriteToConsole($"Connected players: [{Network.Network.connectedClients.ToArray().Count()}]", Logger.LogMode.Title, false);
+            Logger.WriteToConsole($"Connected players: [{Network.connectedClients.ToArray().Count()}]", Logger.LogMode.Title, false);
             Logger.WriteToConsole("----------------------------------------", Logger.LogMode.Title, false);
-            foreach (ServerClient client in Network.Network.connectedClients.ToArray())
+            foreach (ServerClient client in Network.connectedClients.ToArray())
             {
                 Logger.WriteToConsole($"{client.username} - {client.SavedIP}", Logger.LogMode.Warning, writeToLogs: false);
             }
@@ -255,7 +247,7 @@ namespace RimworldTogether.GameServer.Managers
 
         private static void OpCommandAction()
         {
-            ServerClient toFind = Network.Network.connectedClients.ToList().Find(x => x.username == ServerCommandManager.commandParameters[0]);
+            ServerClient toFind = Network.connectedClients.ToList().Find(x => x.username == ServerCommandManager.commandParameters[0]);
             if (toFind == null) Logger.WriteToConsole($"[ERROR] > User '{ServerCommandManager.commandParameters[0]}' was not found", 
                 Logger.LogMode.Warning);
 
@@ -292,7 +284,7 @@ namespace RimworldTogether.GameServer.Managers
 
         private static void DeopCommandAction()
         {
-            ServerClient toFind = Network.Network.connectedClients.ToList().Find(x => x.username == ServerCommandManager.commandParameters[0]);
+            ServerClient toFind = Network.connectedClients.ToList().Find(x => x.username == ServerCommandManager.commandParameters[0]);
             if (toFind == null) Logger.WriteToConsole($"[ERROR] > User '{ServerCommandManager.commandParameters[0]}' was not found", 
                 Logger.LogMode.Warning);
 
@@ -329,13 +321,13 @@ namespace RimworldTogether.GameServer.Managers
 
         private static void KickCommandAction()
         {
-            ServerClient toFind = Network.Network.connectedClients.ToList().Find(x => x.username == ServerCommandManager.commandParameters[0]);
+            ServerClient toFind = Network.connectedClients.ToList().Find(x => x.username == ServerCommandManager.commandParameters[0]);
             if (toFind == null) Logger.WriteToConsole($"[ERROR] > User '{ServerCommandManager.commandParameters[0]}' was not found",
                 Logger.LogMode.Warning);
 
             else
             {
-                toFind.disconnectFlag = true;
+                toFind.listener.disconnectFlag = true;
 
                 Logger.WriteToConsole($"User '{ServerCommandManager.commandParameters[0]}' has been kicked from the server",
                     Logger.LogMode.Warning);
@@ -344,7 +336,7 @@ namespace RimworldTogether.GameServer.Managers
 
         private static void BanCommandAction()
         {
-            ServerClient toFind = Network.Network.connectedClients.ToList().Find(x => x.username == ServerCommandManager.commandParameters[0]);
+            ServerClient toFind = Network.connectedClients.ToList().Find(x => x.username == ServerCommandManager.commandParameters[0]);
             if (toFind == null)
             {
                 UserFile userFile = UserManager.GetUserFileFromName(ServerCommandManager.commandParameters[0]);
@@ -367,9 +359,7 @@ namespace RimworldTogether.GameServer.Managers
 
             else
             {
-                CommandManager.SendBanCommand(toFind);
-
-                toFind.disconnectFlag = true;
+                toFind.listener.disconnectFlag = true;
 
                 UserFile userFile = UserManager.GetUserFile(toFind);
                 userFile.isBanned = true;
@@ -439,30 +429,30 @@ namespace RimworldTogether.GameServer.Managers
 
         private static void ReloadCommandAction()
         {
-            Program.LoadResources();
+            Master.LoadResources();
         }
 
         private static void ModListCommandAction()
         {
-            Logger.WriteToConsole($"Required Mods: [{Program.loadedRequiredMods.Count()}]", Logger.LogMode.Title, false);
+            Logger.WriteToConsole($"Required Mods: [{Master.loadedRequiredMods.Count()}]", Logger.LogMode.Title, false);
             Logger.WriteToConsole("----------------------------------------", Logger.LogMode.Title, false);
-            foreach (string str in Program.loadedRequiredMods)
+            foreach (string str in Master.loadedRequiredMods)
             {
                 Logger.WriteToConsole($"{str}", Logger.LogMode.Warning, writeToLogs: false);
             }
             Logger.WriteToConsole("----------------------------------------", Logger.LogMode.Title, false);
 
-            Logger.WriteToConsole($"Optional Mods: [{Program.loadedOptionalMods.Count()}]", Logger.LogMode.Title, false);
+            Logger.WriteToConsole($"Optional Mods: [{Master.loadedOptionalMods.Count()}]", Logger.LogMode.Title, false);
             Logger.WriteToConsole("----------------------------------------", Logger.LogMode.Title, false);
-            foreach (string str in Program.loadedOptionalMods)
+            foreach (string str in Master.loadedOptionalMods)
             {
                 Logger.WriteToConsole($"{str}", Logger.LogMode.Warning, writeToLogs: false);
             }
             Logger.WriteToConsole("----------------------------------------", Logger.LogMode.Title, false);
 
-            Logger.WriteToConsole($"Forbidden Mods: [{Program.loadedForbiddenMods.Count()}]", Logger.LogMode.Title, false);
+            Logger.WriteToConsole($"Forbidden Mods: [{Master.loadedForbiddenMods.Count()}]", Logger.LogMode.Title, false);
             Logger.WriteToConsole("----------------------------------------", Logger.LogMode.Title, false);
-            foreach (string str in Program.loadedForbiddenMods)
+            foreach (string str in Master.loadedForbiddenMods)
             {
                 Logger.WriteToConsole($"{str}", Logger.LogMode.Warning, writeToLogs: false);
             }
@@ -471,7 +461,7 @@ namespace RimworldTogether.GameServer.Managers
 
         private static void EventCommandAction()
         {
-            ServerClient toFind = Network.Network.connectedClients.ToList().Find(x => x.username == ServerCommandManager.commandParameters[0]);
+            ServerClient toFind = Network.connectedClients.ToList().Find(x => x.username == ServerCommandManager.commandParameters[0]);
             if (toFind == null) Logger.WriteToConsole($"[ERROR] > User '{ServerCommandManager.commandParameters[0]}' was not found",
                 Logger.LogMode.Warning);
 
@@ -501,7 +491,7 @@ namespace RimworldTogether.GameServer.Managers
             {
                 if (ServerCommandManager.eventTypes[i] == ServerCommandManager.commandParameters[0])
                 {
-                    foreach (ServerClient client in Network.Network.connectedClients.ToArray())
+                    foreach (ServerClient client in Network.connectedClients.ToArray())
                     {
                         CommandManager.SendEventCommand(client, i);
                     }
@@ -544,9 +534,9 @@ namespace RimworldTogether.GameServer.Managers
 
         private static void WhitelistCommandAction()
         {
-            Logger.WriteToConsole($"Whitelisted usernames: [{Program.whitelist.WhitelistedUsers.Count()}]", Logger.LogMode.Title, false);
+            Logger.WriteToConsole($"Whitelisted usernames: [{Master.whitelist.WhitelistedUsers.Count()}]", Logger.LogMode.Title, false);
             Logger.WriteToConsole("----------------------------------------", Logger.LogMode.Title, false);
-            foreach (string str in Program.whitelist.WhitelistedUsers)
+            foreach (string str in Master.whitelist.WhitelistedUsers)
             {
                 Logger.WriteToConsole($"{str}", Logger.LogMode.Warning, writeToLogs: false);
             }
@@ -567,7 +557,7 @@ namespace RimworldTogether.GameServer.Managers
 
             bool CheckIfIsAlready(UserFile userFile)
             {
-                if (Program.whitelist.WhitelistedUsers.Contains(userFile.username))
+                if (Master.whitelist.WhitelistedUsers.Contains(userFile.username))
                 {
                     Logger.WriteToConsole($"[ERROR] > User '{ServerCommandManager.commandParameters[0]}' " +
                         $"was already whitelisted", Logger.LogMode.Warning);
@@ -593,7 +583,7 @@ namespace RimworldTogether.GameServer.Managers
 
             bool CheckIfIsAlready(UserFile userFile)
             {
-                if (!Program.whitelist.WhitelistedUsers.Contains(userFile.username))
+                if (!Master.whitelist.WhitelistedUsers.Contains(userFile.username))
                 {
                     Logger.WriteToConsole($"[ERROR] > User '{ServerCommandManager.commandParameters[0]}' " +
                         $"was not whitelisted", Logger.LogMode.Warning);
@@ -612,7 +602,7 @@ namespace RimworldTogether.GameServer.Managers
 
         private static void ForceSaveCommandAction()
         {
-            ServerClient toFind = Network.Network.connectedClients.ToList().Find(x => x.username == ServerCommandManager.commandParameters[0]);
+            ServerClient toFind = Network.connectedClients.ToList().Find(x => x.username == ServerCommandManager.commandParameters[0]);
             if (toFind == null) Logger.WriteToConsole($"[ERROR] > User '{ServerCommandManager.commandParameters[0]}' was not found",
                 Logger.LogMode.Warning);
 
@@ -636,15 +626,15 @@ namespace RimworldTogether.GameServer.Managers
 
         private static void EnableDifficultyCommandAction()
         {
-            if (Program.difficultyValues.UseCustomDifficulty == true)
+            if (Master.difficultyValues.UseCustomDifficulty == true)
             {
                 Logger.WriteToConsole($"[ERROR] > Custom difficulty was already enabled", Logger.LogMode.Warning);
             }
 
             else
             {
-                Program.difficultyValues.UseCustomDifficulty = true;
-                CustomDifficultyManager.SaveCustomDifficulty(Program.difficultyValues);
+                Master.difficultyValues.UseCustomDifficulty = true;
+                CustomDifficultyManager.SaveCustomDifficulty(Master.difficultyValues);
 
                 Logger.WriteToConsole($"Custom difficulty is now enabled", Logger.LogMode.Warning);
             }
@@ -652,15 +642,15 @@ namespace RimworldTogether.GameServer.Managers
 
         private static void DisableDifficultyCommandAction()
         {
-            if (Program.difficultyValues.UseCustomDifficulty == false)
+            if (Master.difficultyValues.UseCustomDifficulty == false)
             {
                 Logger.WriteToConsole($"[ERROR] > Custom difficulty was already disabled", Logger.LogMode.Warning);
             }
 
             else
             {
-                Program.difficultyValues.UseCustomDifficulty = false;
-                CustomDifficultyManager.SaveCustomDifficulty(Program.difficultyValues);
+                Master.difficultyValues.UseCustomDifficulty = false;
+                CustomDifficultyManager.SaveCustomDifficulty(Master.difficultyValues);
 
                 Logger.WriteToConsole($"Custom difficulty is now disabled", Logger.LogMode.Warning);
             }
@@ -668,16 +658,16 @@ namespace RimworldTogether.GameServer.Managers
 
         private static void QuitCommandAction()
         {
-            Program.isClosing = true;
+            Master.isClosing = true;
 
             Logger.WriteToConsole($"Waiting for all saves to quit", Logger.LogMode.Warning);
 
-            foreach (ServerClient client in Network.Network.connectedClients.ToArray())
+            foreach (ServerClient client in Network.connectedClients.ToArray())
             {
                 CommandManager.SendForceSaveCommand(client);
             }
 
-            while (Network.Network.connectedClients.ToArray().Length > 0)
+            while (Network.connectedClients.ToArray().Length > 0)
             {
                 Thread.Sleep(1);
             }
