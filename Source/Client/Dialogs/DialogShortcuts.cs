@@ -20,12 +20,15 @@ namespace GameClient
 
         public static void ShowLoginOrRegisterDialogs()
         {
+            //Remove all server connection windows
+            DialogManager.clearStack();
+
             RT_Dialog_3Input a1 = new RT_Dialog_3Input(
                 "New User",
                 "Username",
                 "Password",
                 "Confirm Password",
-                delegate { ParseConnectionDetails(false); },
+                ParseRegisterUser,
                 DialogManager.PopDialog ,
                 false, true, true);
 
@@ -33,7 +36,7 @@ namespace GameClient
                 "Existing User",
                 "Username",
                 "Password",
-                delegate { ParseLoginUser(); },
+                ParseLoginUser,
                 DialogManager.PopDialog,
                 false, true);
 
@@ -58,7 +61,7 @@ namespace GameClient
                 DialogManager.PopDialog);
 
             RT_Dialog_2Button d2 = new RT_Dialog_2Button("Game Mode", "Choose the way you want to play",
-                "Separate colony", "Together with other players (TBA)", null, delegate { DialogManager.PushNewDialog(d3); },
+                "Separate colony", "Together with other players (TBA)", DialogManager.clearStack, delegate { DialogManager.PushNewDialog(d3); },
                 delegate { DisconnectionManager.RestartGame(true); });
 
             RT_Dialog_OK_Loop d1 = new RT_Dialog_OK_Loop(new string[] { "Welcome to the world view!",
@@ -98,28 +101,28 @@ namespace GameClient
 
         public static void ParseConnectionDetails(bool throughBrowser)
         {
-            bool isInvalid = false;
+            bool isValid = true;
 
             string[] answerSplit = null;
             if (throughBrowser)
             {
                 answerSplit = ClientValues.serverBrowserContainer[(int)DialogManager.inputCache[0]].Split('|');
 
-                if (string.IsNullOrWhiteSpace(answerSplit[0])) isInvalid = true;
-                if (string.IsNullOrWhiteSpace(answerSplit[1])) isInvalid = true;
-                if (answerSplit[1].Count() > 5) isInvalid = true;
-                if (!answerSplit[1].All(Char.IsDigit)) isInvalid = true;
+                if (string.IsNullOrWhiteSpace(answerSplit[0])) isValid = false;
+                if (string.IsNullOrWhiteSpace(answerSplit[1])) isValid = false;
+                if (answerSplit[1].Count() > 5) isValid = false;
+                if (!answerSplit[1].All(Char.IsDigit)) isValid = false;
             }
 
             else
             {
-                if (string.IsNullOrWhiteSpace((string)DialogManager.inputCache[0])) isInvalid = true;
-                if (string.IsNullOrWhiteSpace((string)DialogManager.inputCache[1])) isInvalid = true;
-                if (((string)DialogManager.inputCache[0]).Count() > 5) isInvalid = true;
-                if (!((string)DialogManager.inputCache[1]).All(Char.IsDigit)) isInvalid = true;
+                if (string.IsNullOrWhiteSpace((string)DialogManager.inputCache[0])) isValid = false;
+                if (string.IsNullOrWhiteSpace((string)DialogManager.inputCache[1])) isValid = false;
+                if (((string)DialogManager.inputCache[1]).Count() > 5) isValid = false;
+                if (!((string)DialogManager.inputCache[1]).All(Char.IsDigit)) isValid = false;
             }
 
-            if (!isInvalid)
+            if (isValid)
             {
                 if (throughBrowser)
                 {
@@ -131,8 +134,8 @@ namespace GameClient
                 else
                 {
                     Network.ip = ((string)DialogManager.inputCache[0]);
-                    Network.port = ((string)DialogManager.inputCache[0]);
-                    PreferenceManager.SaveConnectionDetails(((string)DialogManager.inputCache[0]), ((string)DialogManager.inputCache[0]));
+                    Network.port = ((string)DialogManager.inputCache[1]);
+                    PreferenceManager.SaveConnectionDetails(((string)DialogManager.inputCache[0]), ((string)DialogManager.inputCache[1]));
                 }
 
                 DialogManager.PushNewDialog(new RT_Dialog_Wait("Trying to connect to server"));
@@ -148,24 +151,32 @@ namespace GameClient
 
         public static void ParseLoginUser()
         {
-            bool isInvalid = false;
-            if (string.IsNullOrWhiteSpace(((string)DialogManager.inputCache[0]))) isInvalid = true;
-            if (((string)DialogManager.inputCache[0]).Any(Char.IsWhiteSpace)) isInvalid = true;
-            if (string.IsNullOrWhiteSpace(((string)DialogManager.inputCache[0]))) isInvalid = true;
+            bool isValid = true;
+            if (string.IsNullOrWhiteSpace(((string)DialogManager.inputCache[0]))) isValid = false;
+            if (((string)DialogManager.inputCache[0]).Any(Char.IsWhiteSpace)) isValid = false;
+            if (string.IsNullOrWhiteSpace(((string)DialogManager.inputCache[1]))) isValid = false;
 
-            if (!isInvalid)
+            if (isValid)
             {
                 JoinDetailsJSON loginDetails = new JoinDetailsJSON();
+                Logs.Message($"Username: {(string)DialogManager.inputCache[0]}");
                 loginDetails.username = (string)DialogManager.inputCache[0];
+
+                Logs.Message($"password: {(string)DialogManager.inputCache[1]}");
                 loginDetails.password = Hasher.GetHashFromString((string)DialogManager.inputCache[1]);
+
+                Logs.Message($"Version: {CommonValues.executableVersion}");
                 loginDetails.clientVersion = CommonValues.executableVersion;
+
                 loginDetails.runningMods = ModManager.GetRunningModList().ToList();
 
                 ChatManager.username = loginDetails.username;
-                PreferenceManager.SaveLoginDetails(((string)DialogManager.inputCache[0]), ((string)DialogManager.inputCache[0]));
+                PreferenceManager.SaveLoginDetails(((string)DialogManager.inputCache[0]), ((string)DialogManager.inputCache[1]));
 
-                Packet packet = Packet.CreatePacketFromJSON("LoginClientPacket", loginDetails);
-                Network.listener.dataQueue.Enqueue(packet);
+                Packet packet = Packet.CreatePacketFromJSON(nameof(PacketHandler.LoginClientPacket), loginDetails);
+                
+
+                Network.listener.EnqueuePacket(packet);
 
                 DialogManager.PushNewDialog(new RT_Dialog_Wait("Waiting for login response"));
             }
@@ -173,7 +184,7 @@ namespace GameClient
             else
             {
                 RT_Dialog_Error d1 = new RT_Dialog_Error("Login details are invalid! Please try again!",
-                    delegate { DialogManager.PushNewDialog(DialogManager.previousDialog); });
+                    DialogManager.PopDialog);
 
                 DialogManager.PushNewDialog(d1);
             }
@@ -181,14 +192,14 @@ namespace GameClient
 
         public static void ParseRegisterUser()
         {
-            bool isInvalid = false;
-            if (string.IsNullOrWhiteSpace(((string)DialogManager.inputCache[0]))) isInvalid = true;
-            if (((string)DialogManager.inputCache[0]).Any(Char.IsWhiteSpace)) isInvalid = true;
-            if (string.IsNullOrWhiteSpace(((string)DialogManager.inputCache[1]))) isInvalid = true;
-            if (string.IsNullOrWhiteSpace(((string)DialogManager.inputCache[2]))) isInvalid = true;
-            if (((string)DialogManager.inputCache[1]) != ((string)DialogManager.inputCache[2])) isInvalid = true;
+            bool isValid = true;
+            if (string.IsNullOrWhiteSpace(((string)DialogManager.inputCache[0]))) isValid = false;
+            if (((string)DialogManager.inputCache[0]).Any(Char.IsWhiteSpace)) isValid = false;
+            if (string.IsNullOrWhiteSpace(((string)DialogManager.inputCache[1]))) isValid = false;
+            if (string.IsNullOrWhiteSpace(((string)DialogManager.inputCache[2]))) isValid = false;
+            if (((string)DialogManager.inputCache[1]) != ((string)DialogManager.inputCache[2])) isValid = false;
 
-            if (!isInvalid)
+            if (isValid)
             {
                 JoinDetailsJSON registerDetails = new JoinDetailsJSON();
                 registerDetails.username = (string)DialogManager.inputCache[0];
@@ -199,7 +210,7 @@ namespace GameClient
                 Packet packet = Packet.CreatePacketFromJSON("RegisterClientPacket", registerDetails);
 
                 Logs.Message("attempting to send parse register data");
-                Network.listener.dataQueue.Enqueue(packet);
+                Network.listener.EnqueuePacket(packet);
                 Logs.Message("sent parse register data");
                 DialogManager.PushNewDialog(new RT_Dialog_Wait("Waiting for register response"));
             }
@@ -207,7 +218,7 @@ namespace GameClient
             else
             {
                 RT_Dialog_Error d1 = new RT_Dialog_Error("Register details are invalid! Please try again!",
-                    delegate { DialogManager.PushNewDialog(DialogManager.previousDialog); });
+                    DialogManager.PopDialog);
 
                 DialogManager.PushNewDialog(d1);
             }

@@ -165,10 +165,9 @@ namespace GameClient
                 RT_Dialog_YesNo d1 = new RT_Dialog_YesNo("Are you sure you want to continue with the transfer?",
                     delegate
                     {
-                        DialogManager.PopDialog();
                         ClientValues.outgoingManifest.transferMode = ((int)CommonEnumerators.TransferMode.Rebound).ToString();
-                        //pop yes_no dialog
                         postChoosing();
+                        DialogManager.clearStack();
                     }, DialogManager.PopDialog);
 
                 DialogManager.PushNewDialog(d1);
@@ -178,8 +177,6 @@ namespace GameClient
             {
                 TransferManager.TakeTransferItems(transferLocation);
                 TransferManager.SendTransferRequestToServer(transferLocation);
-                //pop transfer menu dialog
-                DialogManager.PopDialog();
             }
         }
 

@@ -13,6 +13,8 @@ namespace GameClient
 
         public static void HandlePacket(Packet packet)
         {
+            Logs.Message($"Packet exists? {packet.header != null}");
+
             if (ClientValues.verboseBool) Logs.Message($"[Header] > {packet.header}");
 
             Action toDo = delegate

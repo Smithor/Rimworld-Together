@@ -75,6 +75,8 @@ namespace GameClient
                 Find.WindowStack.Add(windowStack.Peek());
         }
 
+        
+
         public static void PopDialog(Window window)
         {
             Logs.Message($"[Rimworld Together] > popping {windowStack.Peek().ToString()}");

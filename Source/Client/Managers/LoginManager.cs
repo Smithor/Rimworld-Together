@@ -10,6 +10,7 @@ namespace GameClient
 
         public static void ReceiveLoginResponse(Packet packet)
         {
+            Logs.Message("Recieved login Response");
             DialogManager.PopDialog();
 
             JoinDetailsJSON loginDetailsJSON = (JoinDetailsJSON)Serializer.ConvertBytesToObject(packet.contents);
@@ -17,11 +18,11 @@ namespace GameClient
             switch(int.Parse(loginDetailsJSON.tryResponse))
             {
                 case (int)CommonEnumerators.LoginResponse.InvalidLogin:
-                    DialogManager.PushNewDialog(new RT_Dialog_Error("Login details are invalid! Please try again!"));
+                    DialogManager.PushNewDialog(new RT_Dialog_Error("Login details are invalid! Please try again!", DialogManager.clearStack));
                     break;
 
                 case (int)CommonEnumerators.LoginResponse.BannedLogin:
-                    DialogManager.PushNewDialog(new RT_Dialog_Error("You are banned from this server!"));
+                    DialogManager.PushNewDialog(new RT_Dialog_Error("You are banned from this server!", DialogManager.clearStack));
                     break;
 
                 case (int)CommonEnumerators.LoginResponse.RegisterSuccess:
@@ -29,15 +30,15 @@ namespace GameClient
                     break;
 
                 case (int)CommonEnumerators.LoginResponse.RegisterInUse:
-                    DialogManager.PushNewDialog(new RT_Dialog_Error("That username is already in use! Please try again!"));
+                    DialogManager.PushNewDialog(new RT_Dialog_Error("That username is already in use! Please try again!", DialogManager.clearStack));
                     break;
 
                 case (int)CommonEnumerators.LoginResponse.RegisterError:
-                    DialogManager.PushNewDialog(new RT_Dialog_Error("There was an error registering! Please try again!"));
+                    DialogManager.PushNewDialog(new RT_Dialog_Error("There was an error registering! Please try again!", DialogManager.clearStack));
                     break;
 
                 case (int)CommonEnumerators.LoginResponse.ExtraLogin:
-                    DialogManager.PushNewDialog(new RT_Dialog_Error("You connected from another place!"));
+                    DialogManager.PushNewDialog(new RT_Dialog_Error("You connected from another place!", DialogManager.clearStack));
                     break;
 
                 case (int)CommonEnumerators.LoginResponse.WrongMods:

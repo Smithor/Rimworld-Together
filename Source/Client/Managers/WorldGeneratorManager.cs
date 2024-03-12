@@ -61,6 +61,7 @@ namespace GameClient
 
         public static void GeneratePatchedWorld(bool firstGeneration)
         {
+            DialogManager.clearStack();
             LongEventHandler.QueueLongEvent(delegate
             {
                 Find.GameInitData.ResetWorldRelatedMapInitData();
@@ -123,7 +124,7 @@ namespace GameClient
             worldDetailsJSON = XmlParser.GetWorldXmlData(worldDetailsJSON);
 
             Packet packet = Packet.CreatePacketFromJSON(nameof(PacketHandler.WorldPacket), worldDetailsJSON);
-            Network.listener.dataQueue.Enqueue(packet);
+            Network.listener.EnqueuePacket(packet);
         }
 
         public static void GetWorldFromServer()

@@ -23,7 +23,6 @@ namespace GameClient
         {
             if (TryConnectToServer())
             {
-                DialogManager.PopDialog();
                 SiteManager.SetSiteDefs();
 
                 Threader.GenerateThread(Threader.Mode.Listener);
@@ -70,15 +69,16 @@ namespace GameClient
 
         public static void DisconnectFromServer()
         {
-            listener.connection.Close();
+            Logs.Message("[Rimworld Together] > Attempting to destroy connection");
+            listener.DestroyConnection();
 
-            Log.Message($"[Rimworld Together] > Disconnected from server");
+            Logs.Message($"[Rimworld Together] > Disconnected from server");
 
             if (ClientValues.isQuiting) DisconnectionManager.QuitGame();
             else
             {
                 DialogManager.PushNewDialog(new RT_Dialog_Error("Connection to the server has been lost!",
-                    delegate { DisconnectionManager.DisconnectToMenu(); }));
+                    delegate { DialogManager.clearStack(); DisconnectionManager.DisconnectToMenu(); }));
             }
         }
 
